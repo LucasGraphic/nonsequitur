@@ -142,6 +142,7 @@ Interactive terminal selector with:
 ## Screenshots
 
 ![Splash screen](docs/splash_main_menu.png)
+![Splash screen](docs/discovery.png)
 ## What Works
 
 - [x] Full Discovery → Research → Generate pipeline
