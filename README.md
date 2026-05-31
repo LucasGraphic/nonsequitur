@@ -1,6 +1,8 @@
 # NonSequitur — Autonomous Research & Publishing Platform
 
-> *Non sequitur* — it does not follow. The name is a provocation: in logic, a conclusion that doesn't follow from its premises. In practice, an AI pipeline that doesn't follow the industry's obsession with scale, trending topics, and optimizing for what already ranks.
+> *Non sequitur* — in logic, a conclusion that doesn't follow from its premises. In practice, a platform that doesn't follow the industry's obsession with scale, reach, and optimizing for what already ranks.
+>
+> *The stack exists to serve one purpose: give a single person the research capacity of a newsroom and the editorial independence of nobody's employee.*
 
 Most AI writing tools make it faster to write about what everyone is already writing about. NonSequitur is built for editorial control: any topic, any angle, any voice — with honest analysis and no PR appeasement. Generated entirely on local hardware, published directly to CMS, with no cloud APIs in the core pipeline.
 
@@ -23,7 +25,7 @@ Google News    Trafilatura   27b/122b
 HuggingFace    Reranker
 ```
 
-→ [Full pipeline walkthrough with ASCII diagrams](docs/ARCHITECTURE.md)
+**→ [Full pipeline walkthrough with ASCII diagrams](docs/ARCHITECTURE.md)**
 
 ### Pipeline stages
 
@@ -168,7 +170,7 @@ Interactive terminal selector with:
 
 ## Editorial Mission
 
-NonSequitur targets topics that mainstream gaming and tech press ignores — niche releases, contrarian angles, honest criticism without PR appeasement. Quality is measured by coverage utility and argument depth, not press ratio or trending score. The pipeline is built to write what IGN, PC Gamer, and VentureBeat won't — because they're optimizing for a different audience.
+NonSequitur is built to cover topics the mainstream gaming and tech press ignores, undercovers, or sanitizes — contrarian angles, honest criticism, analysis without PR appeasement. Quality is measured by argument depth and coverage utility, not trending score or press ratio. The platform is designed to write what IGN, PC Gamer, and VentureBeat won't, because they are optimizing for a different audience.
 
 ---
 
