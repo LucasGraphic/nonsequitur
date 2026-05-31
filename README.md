@@ -1,15 +1,12 @@
-# NonSequitur — Autonomous Editorial Engine
+# NonSequitur — Autonomous Research & Publishing Platform
 
-> ***Non sequitur*** — it does not follow. The name is a provocation: in logic, a conclusion that doesn't follow from its premises. In practice, an AI pipeline that doesn't follow the industry's obsession with **scale, trending topics, and optimizing for what already ranks.**
+> *Non sequitur* — it does not follow. The name is a provocation: in logic, a conclusion that doesn't follow from its premises. In practice, an AI pipeline that doesn't follow the industry's obsession with scale, trending topics, and optimizing for what already ranks.
 
 Most AI writing tools make it faster to write about what everyone is already writing about. NonSequitur is built for editorial control: any topic, any angle, any voice — with honest analysis and no PR appeasement. Generated entirely on local hardware, published directly to CMS, with no cloud APIs in the core pipeline.
+
 It searches the web, reads dozens of sources, and writes in the author's voice — not by prompt injection, but by retrieving stored opinions and style from a vector database at generation time. Every article is anchored to a human-written thesis the model cannot override. The pipeline runs unattended. The editorial direction does not.
 
-Under the hood: qwen3-embedding at 4096 dimensions, hybrid 
-dense+sparse retrieval with BM25/RRF fusion, BAAI neural reranking, 
-models up to 122B parameters, a self-hosted meta-search engine, 
-Chromium-based full-text crawler, and a Qdrant vector database — 
-all on local hardware, no subscriptions, no external APIs.
+Under the hood: qwen3-embedding at 4096 dimensions, hybrid dense+sparse retrieval with BM25/RRF fusion, BAAI neural reranking, models up to 122B parameters, a self-hosted meta-search engine, Chromium-based full-text crawler, and a Qdrant vector database — all on local hardware, no subscriptions, no external APIs.
 
 Live output: **[lucasgraphic.com](https://lucasgraphic.com)** — DATA / LAB / PORTFOLIO sections.
 
@@ -25,6 +22,8 @@ Reddit         Crawl4AI      qwen3.5       (optional)
 Google News    Trafilatura   27b/122b
 HuggingFace    Reranker
 ```
+
+→ [Full pipeline walkthrough with ASCII diagrams](docs/ARCHITECTURE.md)
 
 ### Pipeline stages
 
