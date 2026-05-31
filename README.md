@@ -142,12 +142,16 @@ Interactive terminal selector with:
 ## Screenshots
 ## MAIN MENU
 ![Splash screen](docs/splash_main_menu.png)
+## KNOWLEDGE MENU
+![Splash screen](docs/knowledge_menu.png)
 ## DISCOVERY
 ![Splash screen](docs/discovery.png)
 ## QUEUE
 ![Splash screen](docs/queue.png)
 ## RESEARCH
 ![Splash screen](docs/research.png)
+## GENERATE
+
 ## What Works
 
 - [x] Full Discovery → Research → Generate pipeline
