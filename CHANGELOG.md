@@ -1,0 +1,83 @@
+# Changelog
+
+All notable changes to NonSequitur are documented here.  
+Format: [YYYY-MM-DD] with Added / Fixed / Changed / Removed sections.
+
+---
+
+## [2026-05-30]
+
+### Added
+- `pipeline/content_filter.py` — unified garbage detection, single source of truth for both research indexing and RAG retrieval. Replaces duplicated `_is_garbage_text()` in `research_run.py` and `_rag_is_garbage()` in `generate_run.py`
+- `data/slugs.json` — local slug registry, auto-populated after every successful generate
+- Live char-by-char slug autocomplete in discovery UI via `msvcrt` (Windows) / `termios` (Linux) — suggestions appear after 2 characters without pressing Enter
+- 10 LLM-generated topic name suggestions per article in URL and Query discovery modes
+- Clean FOCUS input box across all three discovery modes (URL / Query / Upgrade) — no LLM suggestions, editorial thesis is always human-written
+- Domain column in discovery selector — every result now shows source domain for evaluation before selecting
+- Per-tier RAG minimum score thresholds — `press/trusted: 0.001`, `community: 0.010`, `unknown: 0.020`
+- Blocked domain filter in `discovery/sources.py:fetch_all()` — domains from `domains_blocked.json` are now rejected at fetch time, before reaching Qdrant
+- Qdrant chunk cleanup on `reset → pending` in queue inspect (`[r] redo → [2]`)
+- Qdrant chunk cleanup on `[6] reset researched` in queue main menu
+- `_append_slug_registry()` in `generate_run.py` — appends slug to `slugs.json` after every `✓ Saved`
+- `_suggest_topics()` in `discovery_run.py` — LLM topic name generator with live picker
+- `_ask_focus_simple()` in `discovery_run.py` — clean focus input without LLM angle suggestions
+
+### Fixed
+- `fetch_all` in `discovery/sources.py` was not applying `is_blocked()` filter — blocked domains (instagram.com, ttms.com, etc.) were entering Qdrant research collections
+- URL mode in discovery asked for topic per URL before merge/separate decision — now asks merge/separate first, then topic once for merged items
+- URL display in queue inspect truncated at 80 chars — increased to 120
+- `reset → pending` did not clean Qdrant research chunks — old chunks from blocked domains persisted across re-runs
+- `[6] reset researched` did not clean Qdrant chunks
+- `_suggest_focus()` in discovery generated angles in Polish when source URL had Polish title — flow restructured so LLM receives English topic before generating suggestions
+- `slug_autocomplete()` returned empty results when `knowledge_{category}` collection was empty — now also reads from `data/slugs.json` and `queue.json`
+- SyntaxError in `_slug_live_input()` from escaped string literals — function rewritten cleanly
+
+### Changed
+- `research_run.py` and `generate_run.py` now import `is_garbage` from `pipeline/content_filter.py` — old function bodies left as dead code, safe to remove
+- Prompt in `_build_prompt()`: removed ambiguous "topic as subject area" note that gave model license to deviate from focus angle
+- Prompt: added rule "NEVER invent benchmark scores, version numbers, or model comparisons not present in research context"
+- Discovery URL mode: merge/separate decision moved before topic questions
+- Discovery URL mode: redundant "Custom topic name" prompt removed (TOPIC picker handles this)
+- Quality score threshold in discovery: `QUALITY_THRESHOLD 0.4 → 0.25`
+
+### Removed (domains_blocked.json)
+- Added 27+ domains including: `youtube.com`, `twitter.com`, `x.com`, `instagram.com`, `dailymotion.com`, `twitch.tv`, `resetera.com`, `neogaf.com`, `steamcommunity.com`, `steamdb.info`, `backloggd.com`, `mobygames.com`, `netflix.com`, `eneba.com`, `megagames.com`, `ruh.ai`, `innobu.com`, `aimadetools.com`, `ampcome.com`, `theaicronicle.com`, `ttms.com`, `merriam-webster.com`, `dictionary.cambridge.org`, `vocabulary.com`
+
+---
+
+## [2026-05-29]
+
+### Added
+- HERETIC model (huihui-gpt-120b) installed on Windows inference server
+- Dynamic model selection from Ollama `/api/tags` in discovery menu
+- `[l] slug` in queue inspect — edit slug with auto-slugify
+- `[x] remove` in queue inspect — cleans research chunks from Qdrant before removal
+- `[r] redo` in queue inspect — checks if chunks exist before offering regeneration options
+- Knowledge → Feed submenu with `clip.py` and `manual_feed.py`
+- `SEARXNG_PAGES=4`, `SEARXNG_PAGES_DEEP=6` in config
+
+### Fixed
+- `seen_texts` dedup bug in RAG — duplicate chunks no longer entered context
+- `lstrip("www.")` corrupting domain names (e.g. `wccftech.com` → `ccftech.com`) — replaced with `startswith()` check
+- `sys.path.insert` in `discovery/sources.py` moved to top-level import
+- `time_range` parameter removed from SearXNG fetch — was returning 0 results
+- `_input()` wrapper in discovery — `q` now returns to menu instead of killing process
+- UTF-8 encoding fix for Windows PowerShell in `agent.py`
+- Auto-cleanup of research chunks after generate disabled — chunks now persist until item is removed from queue
+
+### Changed
+- Quality score in discovery rewritten — coverage/relevance/diversity instead of press ratio
+- Refinement prompt — mainstream bias (IGN/GameSpot) removed
+- `deep=False` → `deep=True` in Discovery fetch
+- Persona/research split in generate — `context_persona` and `context_research` as separate blocks
+- H2 headers — `every 2-3 paragraphs` instead of `only when topic changes`
+- Focus enforcement — MANDATORY thesis, model cannot substitute angle
+- `<!-- INTERNAL LINK -->` added to list of forbidden HTML comments
+- SearXNG engines: added startpage, qwant; removed duckduckgo (CAPTCHA on page 2)
+- Google engine: added `paging: true` in SearXNG `settings.yml`
+- RSS sources removed from all categories in `data/source_config.json`
+- Title examples (good vs bad) added to generate prompt
+
+---
+
+*NonSequitur is under active development. Breaking changes may occur between sessions.*
