@@ -1,10 +1,10 @@
 # NonSequitur — Autonomous Article Agent
 
-> *Non sequitur* — it does not follow. The name is aimed at the industry: every AI writing tool in 2026 chases trending topics and optimizes for what already ranks. This one does not follow that logic.
+*Non sequitur* — it does not follow. Every AI writing tool in 2026 chases trending topics and optimizes for what already ranks. This one does not follow that logic.
 
-**NonSequitur** is a fully self-hosted, multi-stage article generation pipeline. It discovers niche topics, researches them through web crawling and hybrid RAG, enforces a mandatory editorial thesis on every article, and generates long-form content — entirely on local hardware, without touching a cloud LLM for the core pipeline.
+Most AI writing tools make it faster to write about what everyone is already writing about. NonSequitur is built for editorial control: any topic, any angle, any voice — with honest analysis and no PR appeasement. Generated entirely on local hardware, published directly to CMS, with no cloud APIs in the core pipeline.
 
-Three things that make it different from standard AI writing tools: the author's voice is stored as Qdrant embeddings and retrieved at generation time (not injected as a system prompt); source quality is enforced structurally through per-tier RAG thresholds (not filtered by the model); and every article is built around a human-written thesis that the LLM cannot substitute.
+It searches the web, reads dozens of sources, and writes in the author's voice — not by prompt injection, but by retrieving stored opinions and style from a vector database at generation time. Every article is anchored to a human-written thesis the model cannot override. The pipeline runs unattended. The editorial direction does not.
 
 Live output: **[lucasgraphic.com](https://lucasgraphic.com)** — DATA / LAB / PORTFOLIO sections.
 
