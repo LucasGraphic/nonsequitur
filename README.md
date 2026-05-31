@@ -1,4 +1,4 @@
-# NonSequitur — Autonomous Research & Publishing Platform
+# NonSequitur - Autonomous Research & Publishing Platform
 
 > *Non sequitur* — in logic, a conclusion that doesn't follow from its premises. In practice, a platform that doesn't follow the industry's obsession with scale, reach, and optimizing for what already ranks.
 >
