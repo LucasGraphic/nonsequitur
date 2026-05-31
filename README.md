@@ -139,7 +139,9 @@ Interactive terminal selector with:
 - Merge/separate decision before topic naming for multi-URL imports
 
 ---
+## Screenshots
 
+![Splash screen](docs/splash_main_menu.png)
 ## What Works
 
 - [x] Full Discovery → Research → Generate pipeline
