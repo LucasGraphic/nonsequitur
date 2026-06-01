@@ -4,6 +4,42 @@ All notable changes to NonSequitur are documented here.
 Format: [YYYY-MM-DD] with Added / Fixed / Changed / Removed sections.
 
 ---
+## [2026-06-01] — Knowledge Base Redesign
+
+### Added
+- `menus/knowledge.py` v2 — complete rewrite of knowledge base menu
+- **Auto-clean before review** (mandatory) — runs before every Inspect & Promote session:
+  - Removes GDPR/TCF consent walls, newsletter signups, author bios, Discourse forum comments, Reddit comments, affiliate disclaimers
+  - Detects and removes duplicate URL crawls (chunk_idx gap > 50 = duplicate crawl)
+  - Full report per label: `GDPR: 312  NEWSLETTER: 45  AUTHOR_BIO: 12  DUPLICATES: 89`
+- **Pre-screening URL list** — before reviewing chunks, shows all URLs with garbage analysis:
+  - `⚠ 11/13 garbage (84%)` — immediately visible which URLs are trash
+  - Trust label per URL: `★ press`, `✓ trusted`, `~ community`, `? unknown`
+- **Bulk decisions on URL list** — without entering chunk view:
+  - `k N` / `e N` / `x N` / `s N` — mark URL for knowledge/evergreen/delete/skip
+  - `x N-M` — delete URL range
+  - `go` — execute all pending decisions
+- **Auto-skip community/unknown URLs** — optional prompt at item start, skips all `~ community` and `? unknown` URLs automatically
+- **topic_slug in payload** — every promoted chunk gets `topic_slug` from queue, enabling slug-based RAG retrieval
+- **Slug edit at promote** — mandatory review of topic_slug before K/E confirm, editable inline
+- **Browse knowledge [4]** — new menu option to browse knowledge collections per slug:
+  - Lists all slugs with chunk counts and top domains
+  - Per-slug chunk view with delete options
+- Chunk commands: `d N-M` range, `df N` delete-from, `dc` forum/comments, `da` all garbage, `v N` preview single chunk
+- `n` / `b` navigation (next/previous URL), `q` quit review at any point
+- `xd` — delete all URLs from current domain in item
+
+### Changed
+- Menu simplified: 11 options → 6 options (`Stats`, `Feed`, `Inspect & Promote`, `Browse knowledge`, `Clean`, `Wipe`)
+- `[10] Review candidates` and `[11] Score candidates` removed — candidates flow eliminated, direct research → knowledge promote
+- `_clean_markdown()` applied automatically on every K/E promote — strips `[label](url)`, `[[N]]`, `**bold**`, headers, image refs
+- Clean menu consolidated: auto-clean, deduplicate, stale removal, domain removal in one place
+
+### Architecture
+- Knowledge base philosophy clarified: `topic_slug` per technology/topic (e.g. `nvidia-dlss`, `grim-dawn`), not per article
+- Slugs aggregate across multiple research runs — knowledge grows with each article on the same topic
+- RAG in `generate_run.py` already filters by `topic_slug` via Qdrant `should` filter — pipeline fully connected end-to-end
+- `knowledge_games` / `knowledge_evergreen` split: evergreen = studio history, mechanics, timeless facts; games = current reviews, patches, prices
 
 ## [2026-06-01]
 
