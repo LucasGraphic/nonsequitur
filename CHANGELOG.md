@@ -4,6 +4,83 @@ All notable changes to NonSequitur are documented here.
 Format: [YYYY-MM-DD] with Added / Fixed / Changed / Removed sections.
 
 ---
+### Planned
+- Payload CMS import (dev environment first)
+- Night run — batch pipeline with morning digest
+- Uber Research — iterative research with coverage scoring
+- Personas — neutral / critic / paranoic `.md` style files
+- REFACTOR `menus/knowledge.py` → split into garbage.py, qdrant_ops.py, review.py, feed.py, browse.py
+- SearXNG engine tuning — paging support, more sources
+- `_finalize_item()` — unified URL/query/upgrade flow
+
+---
+
+## [2026-06-02] — Session 3
+
+### Added
+- **Focus Picker** (`pipeline/focus_picker.py`) — interactive article angle selector
+  - Triggers before `_build_prompt()` when `article_focus` is empty
+  - Generates 20 angles from top 12000 chars of research context using loaded model
+  - UI: numbered list with word-wrap, full text visible
+  - Commands: `[1-20]` select, `[e N]` edit, `[0]` custom, `[s]` skip
+  - Night run: skipped when `item["night_run"] = True`
+- `_strip_html_comments()` in `generate_run.py` — strips `<!-- -->` from LLM output before parsing
+
+### Fixed
+- `article_focus` empty check now strips `'"'` characters — fixes `'""'` stored by queue editor
+- `num_predict` raised from `3200` → `4500` — fixes missing TITLES/EXCERPTS on longer articles
+
+---
+
+## [2026-06-02] — Session 2
+
+### Changed
+- **NORMAL model** switched from `qwen3.5:27b` → `qwen3.6:27b`
+  - `think: false` works identically — no pipeline changes required
+  - Generate time: ~65-80s (was ~79s), output quality improved
+  - Benchmark: GPQA Diamond 87.8 vs 85.5, AIME 2026 94.1 vs 92.6
+- `num_predict` raised from `2500` → `3200` — fixes truncated TITLES/EXCERPTS
+
+### Added
+- **Focus Picker destination** in Knowledge Feed (`menus/knowledge.py`)
+  - Feed Paste and Clip now ask: `[1] knowledge_{category}` or `[2] knowledge_evergreen`
+  - Evergreen chunks: no slug required, category filter only in RAG
+  - `_ask_slug_and_category()` returns `(category, slug, collection)` — three values
+- **Domain fallback** in `research_run.py` — empty `domain` field now populated from `page["url"]`
+- `_strip_html_comments()` placeholder rules in `_build_prompt()` — strengthened absolute ban
+- FORBIDDEN filler patterns in `_build_prompt()`:
+  - `"It is a bold move."` / `"It is a risky move."` style sentences
+  - Short sentence stacks (3+ consecutive sentences under 12 words)
+
+### Fixed
+- Duplicate `RESEARCH_CATEGORIES` definition removed from `config.py` — now single source of truth
+- `research_collection()` validates against full category list including portfolio categories
+
+### Data
+- `dexerto.com` added to `domains_trusted.json` / games — `press`, boost `0.75`
+- `games.gg` and `game.gg` added to `domains_blocked.json`
+
+### RAG garbage patterns added (`_rag_is_garbage()`)
+- Tracking pixels: `t.co/adsct`, `bci=N&dv=`
+- Image markdown fragments: `![Image N](https://t.co/...`
+- Author bylines: `Published on`, `Contributor`
+- YouTube trailer noise: `Watch on YouTube`, `Official Launch Trailer`
+- Author bio variants: `has been an editor for`, `is a staff writer at`, `joined X in 20NN`
+- Navigation leaks: `sign in to your X account`, `log in with your account`
+
+---
+
+## [2026-06-02] — Session 1
+
+### Fixed
+- `IsNullCondition` bug in RAG — replaced with `Filter(must=[slug match])`
+- `knowledge_evergreen` retrieval — category filter only, no slug filter, `ev_top_k = top_k // 4`
+- `top_k=20` passed explicitly to `_retrieve_context()`
+- Article length target: `800-1200` words for 27b/35b (was 1500-2200)
+- No-repetition rule added to `_build_prompt()`
+- Queue commands `[4]`, `[5]`, `[6]` renamed to `[cd]`, `[re]`, `[rr]` — fixes numeric conflict
+
+
 ## [2026-06-01] — Knowledge Base Redesign
 
 ### Added
