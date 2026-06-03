@@ -3,19 +3,25 @@
 All notable changes to NonSequitur are documented here.  
 Format: [YYYY-MM-DD] with Added / Fixed / Changed / Removed sections.
 
----
-### Planned
-- Payload CMS import (dev environment first)
-- Night run — batch pipeline with morning digest
-- Uber Research — iterative research with coverage scoring
-- Personas — neutral / critic / paranoic `.md` style files
-- REFACTOR `menus/knowledge.py` → split into garbage.py, qdrant_ops.py, review.py, feed.py, browse.py
-- SearXNG engine tuning — paging support, more sources
-- `_finalize_item()` — unified URL/query/upgrade flow
+## [2026-06-03]
 
----
+### Added
+- **`menus/knowledge/` package** — refactored monolithic `knowledge.py` (1788 lines) into 9 focused modules: `qdrant_ops`, `chunk_utils`, `review`, `browse`, `feed`, `clean`, `menu`, `domains`. Public API unchanged — `agent.py` import requires no modification.
+- **`[7] Domains` in Knowledge menu** — full UX redesign of `domains_trusted.json` editor. Categories numbered `[1-9]`, domains listed alphabetically with pagination (20/page), select by number for immediate edit. Commands: `r N` remove, `a` add with Tab-autocomplete, `s` search within category, `n`/`p` pagination. Global search via `[s]` from main view. Menu box shown only on entry and after returning from category — no redundant redraws.
+- **`article_length` UI in queue edit** — `[z]` option in item inspect: choose short (1500-2500 chars) / medium (3500-5000 chars) / long (6000-9000 chars). Displayed in queue list as `[S]`/`[L]` badge and in item detail view. Night run reads from queue without prompting, defaults to `medium`.
+- **Pass 3 — optional translation** — after body (pass 1) and titles/excerpts (pass 2), optionally translate body to Polish or Norwegian. Interactive `Translate? [pl/no/Enter=skip]` in manual runs; auto-translate in night run if `article_lang` queue flag set. Titles, excerpts, and slug remain English. New queue field: `article_lang` (en/pl/no, default en).
 
-## [2026-06-02] — Session 3
+### Fixed
+- **`_length_instr` scope bug in `_build_prompt()`** — `_length_map` and `_length_instr` were defined inside `if article_focus:` block, causing `NameError` when focus was empty. Moved outside the conditional — always in scope regardless of focus.
+- **`readline` optional import** — `domains.py` used `import readline` which is unavailable on Windows. Now wrapped in `try/except` with graceful fallback to plain `input()`.
+- **`removeprefix("www.")` in `chunk_utils.py` and `feed.py`** — consistent with global fix from session 4.
+
+### Changed
+- `pipeline/generate_run.py` — added `article_lang` field resolution; pass 3 translation block inserted before `_save_article`.
+- `menus/queue.py` — `[z]` handler, length display in list and item detail.
+
+
+## [2026-06-02]
 
 ### Added
 - **Focus Picker** (`pipeline/focus_picker.py`) — interactive article angle selector
@@ -24,15 +30,17 @@ Format: [YYYY-MM-DD] with Added / Fixed / Changed / Removed sections.
   - UI: numbered list with word-wrap, full text visible
   - Commands: `[1-20]` select, `[e N]` edit, `[0]` custom, `[s]` skip
   - Night run: skipped when `item["night_run"] = True`
-- `_strip_html_comments()` in `generate_run.py` — strips `<!-- -->` from LLM output before parsing
+ `_strip_html_comments()` in `generate_run.py` — strips `<!-- -->` from LLM output before parsing
 
-### Fixed
-- `article_focus` empty check now strips `'"'` characters — fixes `'""'` stored by queue editor
-- `num_predict` raised from `3200` → `4500` — fixes missing TITLES/EXCERPTS on longer articles
-
----
-
-## [2026-06-02] — Session 2
+ - **Focus Picker destination** in Knowledge Feed (`menus/knowledge.py`)
+  - Feed Paste and Clip now ask: `[1] knowledge_{category}` or `[2] knowledge_evergreen`
+  - Evergreen chunks: no slug required, category filter only in RAG
+  - `_ask_slug_and_category()` returns `(category, slug, collection)` — three values
+  - **Domain fallback** in `research_run.py` — empty `domain` field now populated from `page["url"]`
+  - `_strip_html_comments()` placeholder rules in `_build_prompt()` — strengthened absolute ban
+  - FORBIDDEN filler patterns in `_build_prompt()`:
+  - `"It is a bold move."` / `"It is a risky move."` style sentences
+  - Short sentence stacks (3+ consecutive sentences under 12 words)
 
 ### Changed
 - **NORMAL model** switched from `qwen3.5:27b` → `qwen3.6:27b`
@@ -41,20 +49,11 @@ Format: [YYYY-MM-DD] with Added / Fixed / Changed / Removed sections.
   - Benchmark: GPQA Diamond 87.8 vs 85.5, AIME 2026 94.1 vs 92.6
 - `num_predict` raised from `2500` → `3200` — fixes truncated TITLES/EXCERPTS
 
-### Added
-- **Focus Picker destination** in Knowledge Feed (`menus/knowledge.py`)
-  - Feed Paste and Clip now ask: `[1] knowledge_{category}` or `[2] knowledge_evergreen`
-  - Evergreen chunks: no slug required, category filter only in RAG
-  - `_ask_slug_and_category()` returns `(category, slug, collection)` — three values
-- **Domain fallback** in `research_run.py` — empty `domain` field now populated from `page["url"]`
-- `_strip_html_comments()` placeholder rules in `_build_prompt()` — strengthened absolute ban
-- FORBIDDEN filler patterns in `_build_prompt()`:
-  - `"It is a bold move."` / `"It is a risky move."` style sentences
-  - Short sentence stacks (3+ consecutive sentences under 12 words)
-
 ### Fixed
 - Duplicate `RESEARCH_CATEGORIES` definition removed from `config.py` — now single source of truth
 - `research_collection()` validates against full category list including portfolio categories
+- `article_focus` empty check now strips `'"'` characters — fixes `'""'` stored by queue editor
+- `num_predict` raised from `3200` → `4500` — fixes missing TITLES/EXCERPTS on longer article
 
 ### Data
 - `dexerto.com` added to `domains_trusted.json` / games — `press`, boost `0.75`
