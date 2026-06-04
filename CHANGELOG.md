@@ -5,6 +5,23 @@ Format: [YYYY-MM-DD] with Added / Fixed / Changed / Removed sections.
 
 ## [2026-06-04]
 
+### Added
+- `review.py` — unified URL detail view with full chunk text always visible
+- `review.py` — `k -1 -3` syntax: promote all except selected chunks
+- `review.py` — immediate execute: each decision applied instantly, no batch confirm
+- `review.py` — garbage auto-flagging on URL entry
+- `chunk_utils.py` — `RELATED_NAV` pattern (related articles lists)
+- `chunk_utils.py` — `GDPR` pattern (iabgpp, "preferences apply to this website")
+- `queue.py` — slug autocomplete from `slugs.json` + Qdrant, numbered suggestions
+- `queue.py` — tooltip for `[l]` slug edit
+- `queue.py` — `[g]` on done item: auto-reset to researched + regenerate without manual `[r]`
+- `knowledge_chunker.py` — auto-save confirmed slug to `data/slugs.json`
+- `data/slugs.json` — added `mina-the-hollower`, `unreal-engine-6`
+
+### Removed
+- `review.py` — old bulk view commands (`[N] enter URL`, `[k N]`, `[x N-M]`, `[go]`)
+- `review.py` — old chunk detail commands (`[d N-M]`, `[df N]`, `[dc]`, `[da]`, `[u N]`, `[e N]`, `[v N]`)
+ 
 ### Fixed
 - `article_lang` UI in queue edit — `[y]` option added to `_inspect_edit_item`
 - Duplicate `elif cmd == "z":` block removed from `menus/queue.py`
@@ -12,9 +29,18 @@ Format: [YYYY-MM-DD] with Added / Fixed / Changed / Removed sections.
 - Empty lines normalized in `research_run.py` (1918 → 945 lines)
 - Domains menu — implicit search: any text that's not a command treated as search query
 - Domains menu — `s <query>` inline search without extra prompt
+- `review.py` — removed old two-mode flow (bulk view + detail view)
+- `review.py` — mojibake cleanup (unicode escapes replaced with ASCII)
+- `research_run.py` — seed URLs were truncated at 8000 chars (techspot/engadget lost ~70% of content)
+- `data/slugs.json` — BOM fix (PowerShell Set-Content added UTF-8 BOM, json.load failed silently)
+- `queue.py` — wrong `run_generate` call signature when regenerating from done status
 
 ### Changed
 - `│ Lang` field added to queue item detail view
+- `config.py` — `RESEARCH_CHUNK_SIZE` 800→1200
+- `config.py` — `RESEARCH_CHUNK_OVERLAP` 100→150
+- `research_run.py` — overlap implemented in `_chunk()` (was declared but never applied)
+- `research_run.py` — fetch cap 8000→25000 chars
 
 ## [2026-06-03]
 
