@@ -284,6 +284,33 @@ NonSequitur covers topics the mainstream gaming and tech press ignores, undercov
 The platform writes what IGN, PC Gamer, and VentureBeat won't — because they optimise for a different audience, different advertisers, and different incentives. Every article is anchored to a thesis the author chose and the model cannot override. The pipeline automates the labour. The editorial direction remains human.
 
 ---
+## Screenshots
+ 
+### Main Menu
+![Main menu](docs/splash_main_menu.png)
+ 
+### Discovery
+![Discovery](docs/discovery.png)
+ 
+### Queue
+![Queue](docs/queue.png)
+ 
+### Research
+![Research](docs/research.png)
+ 
+### Knowledge Base
+![Knowledge menu](docs/knowledge_menu.png)
+ 
+### Extract — LLM Fact Review
+![Extract](docs/extract.png)
+ 
+### Focus Picker
+![Focus picker](docs/focus_picker.png)
+ 
+### Generate
+![Generate](docs/generate.png)
+ 
+---
 
 ## Author
 
