@@ -3,6 +3,19 @@
 All notable changes to NonSequitur are documented here.  
 Format: [YYYY-MM-DD] with Added / Fixed / Changed / Removed sections.
 
+## [2026-06-04]
+
+### Fixed
+- `article_lang` UI in queue edit — `[y]` option added to `_inspect_edit_item`
+- Duplicate `elif cmd == "z":` block removed from `menus/queue.py`
+- `pipeline/research_run.py` — FFFD replacement chars cleaned, progress bar fixed, section dividers normalized
+- Empty lines normalized in `research_run.py` (1918 → 945 lines)
+- Domains menu — implicit search: any text that's not a command treated as search query
+- Domains menu — `s <query>` inline search without extra prompt
+
+### Changed
+- `│ Lang` field added to queue item detail view
+
 ## [2026-06-03]
 
 ### Added
