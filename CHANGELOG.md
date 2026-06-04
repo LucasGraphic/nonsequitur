@@ -3,6 +3,72 @@
 All notable changes to NonSequitur are documented here.  
 Format: [YYYY-MM-DD] with Added / Fixed / Changed / Removed sections.
 
+# Changelog — Session 2 (2026-06-04)
+ 
+## New Features
+ 
+### `menus/knowledge/extract.py` — LLM Fact Extraction
+New module for extracting factual knowledge from research chunks into permanent knowledge base.
+- `qwen3.6:27b` extracts 3-6 fact paragraphs per URL (no thinking mode)
+- Review UI: `k` keep all / `d N` delete / `e N` edit notepad / `s` skip / `q` quit
+- Resume support — skips URLs already extracted in previous sessions
+- Meta-response filter — discards model's "I found nothing" explanations
+- Immediate upsert per URL — progress saved even if session interrupted
+- New chunks land in `knowledge_{cat}` with `source: "extracted"`, `trust_score: 0.85`
+### `menus/knowledge/domains.py` — Blocked Domains Browser
+New top-level structure in Domains menu:
+- `[1] Trusted` — existing category browser
+- `[2] Blocked` — new browser with add/remove/search/pagination
+- Auto-migration from flat list to dict format on load
+### `pipeline/discovery_run.py` — Add to Trusted on URL Input
+When adding seed URLs, unverified domains now offer three options:
+- `[y]` add URL only (previous behavior)
+- `[t]` add URL + interactively add domain to `domains_trusted.json`
+- `[n]` skip URL
+## Bug Fixes
+ 
+### `menus/knowledge/browse.py`
+- Fixed: after `d N` delete, view now refreshes instead of returning to slug list
+- Points list is now a mutable local copy to prevent side effects
+### `pipeline/research_run.py`
+- Fixed: `topic_slug` now saved to Qdrant payload — required for knowledge RAG retrieval
+- Fixed: blocked domain check added before seed URL fetch and main fetch loop
+### `menus/knowledge/chunk_utils.py`
+- Fixed: `_DOMAIN_BLACKLIST` replaced by `domain_config.is_blocked()` — single source of truth
+- Fixed: `re.DOTALL | re.MULTILINE` flags added to `_garbage_label` for multi-line patterns
+## Improvements
+ 
+### Section-aware chunking (`pipeline/research_run.py`)
+- `_chunk()` now splits on markdown headings (`#`, `##`, `###`) as hard boundaries
+- Overlap stays within a section, never bleeds across headings
+- Heading preserved at top of first chunk in each section for RAG context
+- Result: fewer garbage overlap chunks, cleaner section boundaries
+### New garbage patterns (`menus/knowledge/chunk_utils.py`)
+- `WIKI_HEADER` — Crawl4AI metadata headers from Wikipedia
+- `WIKI_INFOBOX` — Wikipedia markdown infobox tables
+- `NAV_MENU` — site navigation menus (Xbox store, wccftech nav)
+- `ARTICLE_STUB` — article header with author+date but no content
+- `SIDEBAR` — popular discussions / active readers dumps
+- `SPONSORED` — sponsored content markers
+- 3x additional `GDPR` patterns (choices, store/access, withdraw consent)
+### Blocked domains architecture
+- `domains_blocked.json` is now the single source of truth for all blocking
+- Used by: `sources.py` (SearXNG filter), `research_run.py` (fetch filter), `chunk_utils.py` (auto-clean)
+- `url_patterns` and `title_patterns` fields active and supported by `domain_config.py`
+- New blocked: 15 domains + 2 URL patterns (`store.steampowered.com`, `steampowered.com/app/`)
+## Architecture Notes
+ 
+### Knowledge workflow established
+```
+Research -> Auto-clean -> Extract (LLM) -> Wipe research -> Generate
+```
+- Research is temporary — wipe after extract
+- Knowledge accumulates per `topic_slug`
+- RAG retrieves from both `research_{cat}` and `knowledge_{cat}` simultaneously
+- Verified working: `knowledge_games [replaced]: +6 chunks` in RAG output
+### Known limitation
+- Extract `slug` fallback uses `data["topic"]` instead of queue slug when `topic_slug` is empty in research chunks. Fix: pass slug explicitly from queue to extract session (TODO #2).
+- 
 ## [2026-06-04]
 
 ### Added
