@@ -3,6 +3,69 @@
 All notable changes to NonSequitur are documented here.  
 Format: [YYYY-MM-DD] with Added / Fixed / Changed / Removed sections.
 
+# Changelog — (2026-06-05)
+ 
+## New Features
+ 
+### Translation Flag System
+- `translate: bool` field added to queue items — default `false`
+- `[tr]` toggle in queue edit menu — picks language (pl/no), shows `article_pl.md` target
+- Generate pass 3 replaced: no longer asks interactively, fires only when flag set
+- Translation saved to `article_{lang}.md` — English `article.md` always preserved
+- Works in night run unattended
+### `_build_queue_item()` — Centralized Queue Builder
+- All 6 `queue.add_item()` calls in `discovery_run.py` replaced by single helper
+- New fields added once here, not in 6 places
+- Includes: topic, category, persona, section, model, seed_urls, seed_queries, article_focus, topic_slug, topic_tags, upgrade_url, upgrade_mode, translate, article_lang
+### Auto-clean After Research
+- `_auto_clean()` called automatically after each research completes
+- Log output: `[>>] Auto-clean: -N garbage chunks`
+- Eliminates manual step in Knowledge menu
+### Multi-category Evergreen Feed
+- Feed menu offers: single category / multi-category (select) / global (all)
+- Multi-category saves separate chunk per category (same embedding, Valkey cache hit)
+- RAG query now includes `category=global` via `should` filter
+### Garbage Check in Feed
+- Paste/Clip checks first 500 chars against `_garbage_label` before saving
+- Warns user if garbage detected, allows override
+## Bug Fixes
+ 
+### `_add_domain_to_trusted` — `os` not defined
+- `import json as _json, os as _os` — all `os.path` references updated to `_os.path`
+### domain_config cross-category bleed
+- Removed fallback that searched all categories when domain not found in requested category
+- Now strictly: check category → check global → return unknown
+- Prevents ai-data domains appearing in games research
+### `reload_all()` missing after domain save
+- Added to `_save()` and `_save_blocked()` in `domains.py`
+- `lru_cache` cleared immediately — no restart needed after adding domains
+### Extract slug fallback
+- Enriches slug from queue after loading research chunks
+- Prevents `topic_slug = "Full Topic Title"` in knowledge chunks
+### `knowledge_evergreen` category filter
+- RAG now queries `category = current OR category = global`
+- Previously only matched exact category — global chunks were never retrieved
+## Configuration Changes
+ 
+- `RESEARCH_CHUNK_SIZE`: 1200 → 2500
+- `RESEARCH_CHUNK_OVERLAP`: 150 → 250
+- Effect: +67% context in RAG (17829 vs 10653 chars), better seed review coverage
+## Architecture Notes
+ 
+### Single source of truth for domains
+- `domains_blocked.json`: blocked domains, url_patterns, title_patterns
+- `domains_trusted.json`: per-category trust tiers
+- Both files loaded via `domain_config.py` with `lru_cache` + `reload_all()` on save
+- No hardcoded domains in application code
+### Queue item payload
+All fields now pass through `_build_queue_item()`:
+```python
+topic, category, persona, section, model,
+seed_urls, seed_queries, article_focus,
+topic_slug, topic_tags, upgrade_url, upgrade_mode,
+translate, article_lang
+```
+
 # Changelog — Session 2 (2026-06-04)
  
 ## New Features
