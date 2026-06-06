@@ -2,6 +2,55 @@
 
 All notable changes to NonSequitur are documented here.  
 Format: [YYYY-MM-DD] with Added / Fixed / Changed / Removed sections.
+# Changelog -- Session 10 (2026-06-06)
+
+## [10.0.0] Persona Architecture Overhaul
+
+### Breaking Changes
+- `persona_lukasz` single collection replaced by 6 subcollections
+- `.md` persona files no longer required -- system falls back to Qdrant
+- `manual_feed.py` now routes persona chunks to subcollections by `subcategory` field
+
+### Added
+- Multi-collection persona retrieval in `generate_run.py`: style + worldview always, category-specific on match
+- Multi-collection persona RAG in `claude_rewrite.py`
+- Scoring pass design (implementation pending) -- gate before rewrite in night run
+- 6 persona collections: style, worldview, games, ai, tech, photography
+- `persona_lukasz_v2.json` master file as single source of truth
+- Deterministic upsert IDs -- safe reimport without duplicates
+
+### Fixed
+- Persona chunks incorrectly going to `author_voice_block` with "do NOT reproduce" instruction -- now correctly routed to `persona_block` with "internalize" instruction
+- `_pick_persona()` in claude_rewrite.py blocking execution when .md file missing
+- `subcategory` field overwritten by `tag` field in manual_feed.py
+- Persona chunks sorted against reranker scores (different scale) -- now appended as separate block
+- `worldview` missing from SUBCATEGORY_MAP in manual_feed.py
+- Unicode mojibake in menus/queue.py (queue_clean.py generated, pending copy)
+
+### Changed
+- Rewrite word target: 900-1200 -> 1200-1800 words
+- PERSONA_THRESHOLD: 0.18 -> 0.15 (0.18 too aggressive, lost voice)
+- Model strategy: 27B default for opinions/gaming, 122B for technical precision
+
+### Model Performance Notes
+- qwen3.6:27b produces better voice/opinion articles
+- qwen3.5:122b produces more precise but generic text -- worse for opinion pieces
+- 122B generation time: ~8min (down from 40-50min with old hardware)
+
+---
+
+## Root Cause Fixed This Session
+
+The core problem: `persona_text` (from .md file) was empty because the file never existed.
+`context_persona` (Qdrant chunks) was going to `author_voice_block` with instruction
+"do NOT reproduce" -- model ignored persona as style guide.
+
+Fix: when persona_text is empty, use context_persona as persona_block with
+"internalize this persona" instruction instead.
+
+This was the root cause of all voice/persona issues across multiple sessions.
+
+---
 
 # Changelog — (2026-06-05)
  
