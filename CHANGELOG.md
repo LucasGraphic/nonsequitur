@@ -2,6 +2,117 @@
 
 All notable changes to NonSequitur are documented here.  
 Format: [YYYY-MM-DD] with Added / Fixed / Changed / Removed sections.
+# Changelog — Sessions 13–14 (2026-06-08 / 2026-06-09)
+
+---
+
+## 2026-06-09
+
+### pipeline/generate_run.py
+- **Reranker fallback** — when reranker times out, pipeline now applies manual persona/research split instead of falling back to raw `all_scored[:top_k]` which allowed persona chunks (hardcoded score 0.3) to dominate context and displace research
+- **Reranker spinner** — animated spinner displayed during reranker call so operator knows the process is running; replaces silent wait
+- **Reranker timeout** — increased from 30s to 60s to accommodate GTX 1080 inference latency on larger pools
+- **Section name generator: last section protected** — final schema section name is never replaced by LLM-generated name; prevents generated names from conflicting with `purpose` in verdict/conclusion sections (e.g. "Buy Only If You Tolerate Broken Launch" overriding "Verdict" purpose)
+- **opening_rule / closing_rule** — new optional schema fields injected into `=== ARTICLE STRUCTURE ===` block; anchor model behaviour for first and last paragraph without adding FORBIDDEN entries; fixes D1 (generic opener) and D3/G4 (buy-skip conclusion) systematically
+- **Dead code removed** — `art_len` / `ARTICLE_LENGTH` import in `_build_prompt()` was unused since schema system replaced `_length_map`; removed
+
+### pipeline/research_run.py
+- **Critical architecture fix: deferred chunk deletion** — old chunks were deleted at research start (before fetching), meaning a failed re-research (CF-blocked seeds, thin fallback) left the item with near-empty Qdrant data while queue showed status `researched`; deletion now occurs only after new chunks are confirmed non-empty (`len(points) > 0`); old data preserved on research failure
+
+### config.py
+- `RERANKER_FETCH_N`: 100 → 50 — reduces reranker payload size, lowers timeout risk on GTX 1080
+
+### data/schemas/ — all schemas revised
+- Added `opening_rule` and `closing_rule` fields to all schemas
+- `games_review.json` — strengthened all section purposes; Verdict purpose rewritten to prevent buy/skip binary
+- `games_analysis.json` — "The question" renamed to "The argument"; purposes sharpened
+- `games_announcement.json` — purposes tightened; speculation explicitly forbidden
+- `ai_news.json` — last section renamed from "What to watch" to "Why it matters or doesn't"; purpose rewritten to force verdict instead of open questions
+- `ai_technical.json` — Verdict and Limitations purposes strengthened; cherry-picking callout added
+- `hardware_review.json` — Verdict purpose rewritten; competitor naming required
+- `default.json` — opening/closing rules added
+
+### data/schemas/ — new schemas added
+- `games_early_access.json` — EA-specific review schema; judges current build state, not roadmap promises
+- `software_review.json` — tool/SaaS review schema; covers pricing, vendor lock-in, open-source alternatives
+- `industry_analysis.json` — trend analysis schema; requires naming winners/losers, forbids "only time will tell"
+
+---
+
+## 2026-06-08
+
+### pipeline/generate_run.py
+- **Article schema system** — replaced `_length_map` char targets with per-category JSON schemas from `data/schemas/`; each schema defines section names + purposes; model decides natural length from available content
+- **LLM section name generator** — before `_build_prompt()`: 27b generates unique H2 names per article from top 3000 chars research + focus + schema purposes; falls back to schema defaults on failure; eliminates generic headers across all schemas
+- **Density rule** — entire FORBIDDEN block (50+ lines) replaced with 3 positive rules: (1) every sentence = fact or evaluation, (2) follow schema sections exactly, (3) never invent numbers/dates/names
+- **Research quality gate** — before generation: checks chars + sources + press/trusted count; thresholds CRITICAL/THIN/SPARSE/OK/GOOD; interactive prompt in manual mode, auto-continue with log in night run
+- **PIN_MIN_CHARS = 300** — seed chunks under 300 chars (Cloudflare-blocked pages) not pinned in RAG; prevents nav/cookie text from displacing real content
+- **`LLM_TEMPERATURE`**: 0.7 → 0.4
+- **Mojibake fixed** — ftfy repair applied, 58857 chars, clean UTF-8
+
+### pipeline/scoring_pass.py
+- Schema-aware scoring — `SCHEMA_OVERRIDES` dict; D9 suppressed for `games_announcement` and `ai_news` (announcement-type articles have no gameplay to evaluate)
+- `article_type` param added
+- `NUM_PREDICT`: 800 → 1200
+- Article truncation: 4000 → 8000 chars
+
+### pipeline/research_run.py
+- **SearXNG fallback for Cloudflare seed URLs** — seed URL returning <500 chars triggers SearXNG search using longest seed query; results merged into research pool before main fetch
+- Fallback query fix — uses `max(seed_queries, key=len)` for most specific query
+- Search query improvements
+
+### pipeline/discovery_run.py
+- `article_type` picker added to Discovery URL flow (numbered schema list)
+- `default_length` auto-set from schema on selection
+- Focus suggestions removed (Focus Picker at generate time is the right place)
+- Cloudflare warnings when adding seed URLs
+
+### discovery/sources.py
+- SearXNG engines narrowed to `google,duckduckgo,brave`
+- Removed: bing, startpage, qwant, yahoo news, reuters
+
+### menus/queue.py
+- `[a]` command — schema picker for queue items
+- Schema display in item detail view
+- Cloudflare warning in `[u]` seed URL add flow
+
+### menus/knowledge/domains.py
+- `is_cloudflare(domain)` — checks domain against CF list
+- `cloudflare_domains()` — loads `data/domains_cloudflare.json`
+
+### config.py
+- `ARTICLE_SCHEMAS` removed — migrated to `data/schemas/*.json`
+- `LLM_TEMPERATURE`: 0.7 → 0.4
+
+### data/schemas/ — new directory
+- 7 schema files: `default`, `games_announcement`, `games_review`, `games_analysis`, `ai_technical`, `ai_news`, `hardware_review`
+- Each file: `label`, optional `note`, `sections[]` with `name`+`purpose`, `default_length`
+
+### data/domains_cloudflare.json — new file
+- Known Cloudflare-protected domains for SearXNG fallback trigger
+
+### ~/stack-rag/docker-compose.yml
+- SearXNG image pinned to `searxng/searxng:2026.6.8-f3fab143b` (was `latest` → `2026.5.13` had `ambiguous shortcut: -` crash bug)
+
+### ~/stack-rag/searxng-settings/settings.yml
+- Regenerated fresh after image upgrade
+- `json` format manually re-added (not in auto-generated defaults)
+
+### fix_mojibake.py — new tool
+- Reads file as latin-1, repairs via ftfy, writes clean UTF-8
+- Usage: `python fix_mojibake.py path\to\file.py`
+
+---
+
+## Known issues (open)
+
+- `menus/queue.py` — mojibake not yet cleaned
+- `claude_rewrite.py` line 389 — hardcoded `Length: 1200-1800 words` not synced with schema `default_length`
+- `[a]` schema change does not auto-update `article_length` on existing queue items
+- ~24/594 research chunks passing `_min_score` filter into reranker — RRF score distribution needs investigation
+- `odysseusai.net`, `blog.veefly.com` — SEO spam, not yet blocked
+- `forums.guru3d.com` — misclassified as press
+- Personas `neutral`, `critic`, `paranoic` — not yet created
 # Changelog -- Session 10 (2026-06-06)
 
 ## [10.0.0] Persona Architecture Overhaul
