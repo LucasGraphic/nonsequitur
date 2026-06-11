@@ -4,6 +4,71 @@ All notable changes to NonSequitur are documented here.
 Format: [YYYY-MM-DD] with Added / Fixed / Changed / Removed sections.
 
 ---
+# Changelog — 2026-06-11
+# Persona System Refactor
+
+### Added
+- `persona_lukasz` Qdrant collection with new schema:
+  - `dense` vector (dim=4096) — text embedding for semantic search
+  - `trigger_dense` vector (dim=4096) — trigger string embedding for coverage sampling
+  - `sparse` vector — BM25 for hybrid RRF retrieval
+  - Payload fields: text, text_hash, dimension, trigger, intensity, topic, slug, source
+- Coverage-based sampling in `pipeline/generate_run.py`:
+  - One chunk per dimension selected (max PERSONA_MAX=8)
+  - Trigger matching via cosine similarity between trigger_dense and article focus vector
+  - Replaces score-based top-N from multi-collection queries
+- `update/patch_persona_05_insert_tool.py` — interactive CLI tool for inserting
+  persona chunks with dimension/trigger/intensity fields and stats visualization
+- `data/personas/lukasz_chunks.json` — master persona chunk file (11 chunks, 10 dimensions)
+- JSON sync workflow in `menus/knowledge/feed.py`:
+  - [P] → [1] Sync from JSON file
+  - Deduplication by text_hash — inserts only new chunks
+- 11 persona chunks covering all 10 dimensions:
+  writing_rhythm, argumentation, criticism_style, hype_reaction, technical_depth,
+  niche_appreciation, broken_expectation, worldview, humor, reference_thinking
+- New triggers: `when regulation replaces ambition`,
+  `when industry misses what the technology is actually for`,
+  `when power normalizes what should remain unacceptable`,
+  `when niche community is right and critics are wrong`,
+  `when something changes so gradually you miss the moment it happened`
+
+### Changed
+- `config.py`:
+  - `PERSONA_MAX` 5 → 8 (one per dimension)
+  - Added `PERSONA_COLLECTION = "persona_lukasz"`
+  - Added `PERSONA_TRIGGER_W = 0.4`
+- `pipeline/generate_run.py`:
+  - Persona retrieval: 3 separate collection queries → 1 query to `persona_lukasz`
+  - Persona retrieval moved outside `sub_queries` loop (was called once per sub-query)
+  - Persona context cap: 2000 → 6000 chars
+  - Author voice instruction: "reference ONLY / Do NOT reproduce" →
+    "Let the tone and attitude bleed into every sentence"
+  - Section name generation: `OLLAMA_URL` (localhost/Windows) →
+    `OLLAMA_EMBED_URL` (Ubuntu) + `META_MODEL` (qwen2.5:7b), timeout 45s → 120s
+  - Tuple normalization added: persona 7-tuples stripped to 6-tuples
+    before downstream context building
+- `menus/knowledge/feed.py`:
+  - `[P]` feed replaced: old clipboard-based persona feed →
+    new JSON sync with dimension/trigger/intensity support
+
+### Removed
+- Qdrant collections: `persona_lukasz_style`, `persona_lukasz_worldview`,
+  `persona_lukasz_games`, `persona_lukasz_ai`, `persona_lukasz_tech`,
+  `persona_lukasz_photography`, `persona_critic`, `persona_neutral`, `persona_paranoic`
+
+### Fixed
+- Syntax error in generate_run.py from multiple starred expressions in tuple unpacking
+- Persona retrieval called N times (once per sub-query) instead of once
+- `too many values to unpack` error in pin seed block (7-tuple persona chunks)
+- `too many values to unpack` error in context building loop
+- Section name generation timing out due to GPU contention on localhost
+
+### Result
+- Persona coverage: 8 dimensions in context (was 1-3 in old system)
+- Persona context: ~7000 chars (was 624 chars)
+- Voice audibility: clearly improved in test article (Fable 5)
+- Next step: expand chunk collection to 30-40 for better trigger diversity
+
 # Changelog — Session 2 (2026-06-09)
  
 ## Features
