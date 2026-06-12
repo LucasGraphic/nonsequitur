@@ -4,6 +4,120 @@ All notable changes to NonSequitur are documented here.
 Format: [YYYY-MM-DD] with Added / Fixed / Changed / Removed sections.
 
 ---
+# Changelog — 2026-06-12
+ 
+## Critical Fixes
+ 
+### hotfix_reranker_topn + hotfix_reranker_topn_v2
+**File:** `pipeline/generate_run.py`
+**Bug:** Reranker `top_n` was calculated as `max(RERANKER_TOP_N - len(persona_chunks), 5)`.
+Since `len(persona_chunks) = 40` (all retrieved) and `RERANKER_TOP_N = 35`,
+result was always `max(-5, 5) = 5`. Every article since session 17 had only
+5 research chunks in context instead of ~27.
+**Fix:** Changed to `max(RERANKER_TOP_N - PERSONA_MAX, 5)` = `max(35-8, 5) = 27`.
+Added `from config import PERSONA_MAX` before the payload dict (scope fix).
+ 
+### hotfix_pin_seed
+**File:** `pipeline/generate_run.py`
+**Bug:** Seed URL pinning iterated over `all_scored` (pre-reranker full pool),
+bypassing quality filtering. Low-scoring seed-domain chunks (e.g. old PaLM/Bard
+chunk from blog.google, score 0.09) were pinned into context displacing real content.
+**Fix:** Changed iteration from `all_scored` to `top` (post-reranker list).
+Seed chunks must now survive reranker to be pinned.
+ 
+---
+ 
+## Persona System
+ 
+### patch_persona_09 + hotfix_persona_09a
+**File:** `discovery/selector.py`
+Persona picker in discovery flow now queries Qdrant chunk count instead of
+checking `.md` file existence. `lukasz` shows `(48 chunks)`, other personas
+show `[no chunks yet]`. Fixed slug filter bug — counts all chunks in collection.
+ 
+### patch_persona_10 + patch_persona_10b + patch_persona_10c
+**Files:** `menus/knowledge/feed.py`, `config.py`
+Added `PERSONA_DIMENSIONS` list to config.py. Added `_persona_dimension_stats()`
+function showing per-dimension chunk counts with `← needs more` flags.
+Stats display before PERSONA SYNC submenu on `[P]`.
+ 
+### patch_persona_11
+**File:** `menus/knowledge/feed.py`
+`[P]→[1] Sync` now accepts directory path — loads all `*.json` files automatically.
+`[P]→[2] Export` new option — dumps entire persona_lukasz collection to JSON,
+sorted by dimension/trigger.
+Old workflow: manually merge JSON files.
+New workflow: drop files in `data/personas/`, sync picks up everything.
+ 
+### Persona chunks added (session 18)
+- 22 chunks: general voice (criticism_style, hype_reaction, argumentation,
+  technical_depth, niche_appreciation, worldview, reference_thinking, writing_rhythm, humor)
+- 15 chunks: literary references (Orwell ×3, Pratchett ×3, Adams ×3, Kafka ×3, Bradbury ×3)
+- Total: 48 chunks / 10 dimensions populated
+---
+ 
+## Garbage Filtering
+ 
+### patch_garbage_reddit
+**File:** `pipeline/generate_run.py`
+Added Reddit UI patterns to `_rag_is_garbage()`:
+- Username + timestamp: `\w+\s+•\s+\d+[dhmwy]\s+ago`
+- Comment thread nav, sorted by, u/ prefixes
+### patch_garbage_extended
+**File:** `pipeline/generate_run.py`
+Added extended garbage patterns:
+- **arXiv:** `report issue for preceding element`, submission boilerplate,
+  anonymous authors, preprint notices
+- **Wikipedia/wiki:** stub notices, edit/view history links, coordinates,
+  retrieved from wikipedia
+- **Hacker News:** points/hours/comments UI, ask HN / show HN, hide|past|favorite
+- **Medium/Substack:** member-only story, min read, clap counts, responses
+- **GitHub:** star/fork counts, commit/branch counts, clone instructions
+- **Paywall:** subscribe/upgrade prompts, article limit notices, register to read
+---
+ 
+## Article Schemas
+ 
+### ai_news.json
+- Removed `closing_rule` (was duplicate of last section purpose)
+- Added explicit anti-formula rule: never start final paragraph with
+  "In conclusion", "The definitive assessment", "Ultimately", "To summarize"
+- Last section purpose: end on specific observation, not verdict formula
+### ai_technical.json
+- Removed `closing_rule` duplicate
+- Verdict purpose: end on "the thing that will still matter in two years — or won't"
+### games_review.json
+- Verdict purpose: end on what makes game memorable/forgettable, not recommendation
+### games_analysis.json
+- Conclusion purpose: end on implication, not restatement of argument
+### hardware_review.json
+- closing_rule changed from buy/skip binary to manufacturer priorities insight
+### industry_analysis.json
+- Verdict purpose: end on consequence most people aren't yet talking about
+### default.json
+- closing_rule: no summary of what was already said
+---
+ 
+## Queue & Sources
+ 
+### patch_queue_sources
+**File:** `menus/queue.py`
+`[s] RAG sources` was searching for `*.sources.json` in `OUTPUT_DIR` root.
+`_save_article()` saves `sources.json` inside article subdirectory.
+Fixed to search subdirectories, sorted newest-first, match by item_id.
+ 
+---
+ 
+## Scoring
+ 
+### patch_scoring_verbose
+**Files:** `pipeline/scoring_pass.py`, `menus/queue.py`
+- `scoring_pass.py`: saves `raw_response` to `metadata.json` scoring block;
+  prints full Q/D/G breakdown inline after every scoring run
+- `queue.py` `_score_single()`: shows saved breakdown from last run when `[sc]`
+  is pressed; asks "Re-score now?" before running LLM again; graceful fallback
+  for old metadata without raw_response
+  
 # Changelog — 2026-06-11
 # Persona System Refactor
 
