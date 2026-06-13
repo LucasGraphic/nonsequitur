@@ -1,10 +1,96 @@
-# Changelog
+# CHANGELOG
 
 All notable changes to NonSequitur are documented here.  
 Format: [YYYY-MM-DD] with Added / Fixed / Changed / Removed sections.
 
 ---
 
+# Date: 2026-06-13
+
+## Patches applied
+
+### patch_dynamic_models.py
+- config.py: replaced hardcoded MODELS dict with fetch_ollama_models()
+- Queries Ollama /api/tags at runtime
+- Filters embedding/reranker models by name
+- Falls back to MODELS_FALLBACK when Ollama unreachable
+- MODELS_FALLBACK keeps previous hardcoded values
+- NOTE: menu picker not yet updated to use fetch_ollama_models()
+
+### patch_slug_discovery.py
+- pipeline/discovery_run.py: added _ask_slug() function
+- _ask_slug(): zero external dependencies, auto-suggests slug from topic
+- Replaced broken prompt_slug_and_tags calls in all 3 modes (URL, Query, Upgrade)
+- prompt_slug_and_tags was silently failing (ModuleNotFoundError: knowledge)
+- Cleaned all unicode box/arrow chars -> ASCII in entire file
+
+### patch_think_guard.py
+- pipeline/generate_run.py: think:false now sent only to qwen3.x models
+- Previously sent to all models including llama/mistral (could cause crashes)
+- Added _THINK_MODELS = ("qwen3",) check via model.startswith()
+
+### patch_garbage_patterns.py
+- pipeline/generate_run.py: added missing garbage patterns to _rag_is_garbage()
+- New patterns: TOC nav (## Jump to section), FAQ boilerplate,
+  HN thread nav (parent | prev | next), spec tables (| Area | Claude |),
+  datestamp fragments (Last verified: **), Fast Verdict/Routing Decision headers
+- Fixed: added re.MULTILINE to main for loop (^ anchors were not working before)
+
+### patch_dedup_research.py
+- menus/knowledge/clean.py: research_* added to [2] Deduplicate
+- Previously only knowledge_* and persona_* were deduplicated
+- Result: 375 duplicates removed on first run
+  - research_ai-data: -262
+  - research_games: -93
+  - research_hardware: -20
+
+## Model shootout results
+
+| Model | Score | Time | Verdict |
+|-------|-------|------|---------|
+| qwen3.5:35b-a3b | 7.7/10 | 88s | KEEP — best score in project history |
+| qwen3.5:35b-a3b | 7.4/10 | 87s | KEEP |
+| llama3.3:70b | 2.1/10 | 549s | REMOVED — dense, slow, zero quality signals |
+| mistral-large | not tested | - | REMOVED — dense 123B, same situation as llama |
+
+- llama3.3:70b removed: ollama rm llama3.3:70b (freed 42GB)
+- mistral-large removed: ollama rm mistral-large:latest (freed 73GB)
+- Total freed: ~115GB
+
+## Knowledge base changes
+
+- knowledge_ai-data: 0 -> 73 chunks
+  - Claude Fable 5 / Mythos 5: pricing, benchmarks, safety classifiers,
+    Stripe case study, comparison vs GPT-5.5, Terminal-Bench scores
+  - DiffusionGemma: architecture, Uniform State Diffusion, Block-AR Multi-Canvas,
+    benchmark numbers (MMLU Pro, Codeforces ELO, GPQA), hardware requirements,
+    VRAM by precision (BF16=52GB, INT8=28GB, NVFP4=18GB), authors,
+    limitations (Apple Silicon, high-QPS cloud, short answers)
+
+- research collections after dedup:
+  - research_ai-data: 1422 -> 1160 chunks
+  - research_games: 1283 -> 1190 chunks
+  - research_hardware: 200 -> 180 chunks
+
+## Bugs identified (not yet fixed)
+
+- RAG dedup missing after reranker — P0, game changer for generation quality
+- Extract facts shows duplicates to user — P1, extract.py ready for patch
+- Model picker menu uses old MODELS dict — P2
+- Inspect does not show knowledge_* collections — P3
+- [g] from edit menu does not ask for focus reset — P4 (carried from S19)
+
+## Observations
+
+- MoE >> dense for this use case: qwen3.5:122b (MoE ~14B active) faster than
+  llama3.3:70b (dense 70B) despite 5x fewer active parameters
+- Kimi K2.6 requires 394GB+ RAM minimum — not viable on this hardware
+- RAG context contains 60-70% paraphrased duplicates from multi-URL research
+  — root cause of "averaging" style in generated articles
+- Extract facts: after 15-20 URLs on same topic, ~80% of facts are duplicates
+- Score 7.7 achieved with: good focus (Focus Picker), data-rich topic,
+  ai_news schema with opening_rule/closing_rule
+  
 ## 2026-06-12/13
  
 ### Migration
