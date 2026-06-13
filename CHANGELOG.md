@@ -4,8 +4,7 @@ All notable changes to NonSequitur are documented here.
 Format: [YYYY-MM-DD] with Added / Fixed / Changed / Removed sections.
 
 ---
-# NonSequitur — Changelog Session 19
- 
+
 ## 2026-06-12/13
  
 ### Migration
