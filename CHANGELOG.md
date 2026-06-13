@@ -4,6 +4,54 @@ All notable changes to NonSequitur are documented here.
 Format: [YYYY-MM-DD] with Added / Fixed / Changed / Removed sections.
 
 ---
+# NonSequitur — Changelog Session 19
+ 
+## 2026-06-12/13
+ 
+### Migration
+- Moved agent from `C:\agent-llm\` to `C:\NonSequitur\`
+- New clean venv, requirements from freeze
+- `agent.py` → `nonsequitur.py`
+- `.env` + `.env.example` with `load_dotenv()` in config.py
+- Dead files excluded: generation/, rag/, taxonomy/ (except categories.py still needed)
+### Added
+- `pipeline/scoring_pass.py` — full rewrite with 8-phase verbose scoring
+  - Anchor score as ceiling (not floor)
+  - A1-A4 argument structure evaluation
+  - D1-D10 disqualifiers with per-signal reasoning
+  - Q1-Q8 quality signals with quotes/locations
+  - G1-G4 genericity signals with locations
+  - V1-V2 voice consistency
+  - Confidence + reason
+  - `ready` replaces `skip` as recommendation
+- `pipeline/generate_run.py` — trust hierarchy in research_block
+  - `chunk_meta: list = None` parameter in `_build_prompt()`
+  - Trust note: X trusted/press vs Y unknown/aggregator
+  - Unknown sources get qualification instruction
+- `menus/queue.py` — focus reset on redo
+  - "Reset focus? [Y/n]" before "Generate now?" in all 3 redo locations
+- `data/domains_trusted.json` — major expansion
+  - ai-data: +20 domains (Google AI, Meta AI, HuggingFace, research orgs, IEEE, Nature)
+  - hardware: +15 domains (ARM, Qualcomm, TSMC, ASML, EU press)
+  - software: +20 domains (official language/platform docs, infrastructure)
+  - security: +7 domains (Schneier, OWASP, NIST, CISA)
+  - games: +25 domains (studios, platforms)
+  - photography: +10 domains (manufacturers, review sites)
+  - 3d: +10 domains (DCC tools, asset stores)
+### Fixed
+- `pipeline/generate_run.py` — mojibake pass (75000+ chars fixed via ftfy)
+- `pipeline/generate_run.py` — section renamer: no dates in section names
+- `pipeline/generate_run.py` — last section now renamed (skip removed)
+- `data/schemas/*.json` — mojibake fixed in all 11 schemas
+- `data/schemas/ai_news.json` — opening_rule: max 15 words, tweet-worthy
+- `data/schemas/ai_news.json` — closing_rule: analogy instruction added
+- `config.py` — all IPs/URLs read from .env via os.getenv() with fallbacks
+### Known broken / not fixed
+- `knowledge_ai-data` collection does not exist — knowledge=0 for all ai-data articles
+- `taxonomy/` module archaic but still imported
+- Slug not asked during queue add
+- `[g]` from edit menu does not reset focus
+ 
 # Changelog — 2026-06-12
  
 ## Critical Fixes
