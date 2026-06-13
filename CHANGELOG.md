@@ -1,9 +1,105 @@
-# CHANGELOG
+# CHANGELOG --== NonSequitur ==--
 
 All notable changes to NonSequitur are documented here.  
 Format: [YYYY-MM-DD] with Added / Fixed / Changed / Removed sections.
 
 ---
+# Date: 2026-06-13/2
+
+## pipeline/generate_run.py
+
+### RAG: scroll + BM25 zamiast HNSW query_points [P0]
+- Replaced loop `for query in sub_queries` + `query_points()` dla research
+  with single `client.scroll()` + lokalnym BM25 rankingiem
+- Coverage: 72/408 → 408/408 chunków (18% → 100%)
+- BM25 pre-rank: top RERANKER_FETCH_N do rerankerze
+- Knowledge/evergreen/persona: nadal query_points (bez zmian)
+- sp_indices/sp_values computed from primary_query (not from last sub_query)
+
+### RAG: diverse sub-queries [patch_rag_coverage]
+- 4 angles instead of suffix variants ("features and details" itp.):
+  technical architecture, benchmarks, limitations, industry impact
+- Prefetch limit: top_k*3 → top_k*6, RRF limit: top_k*2 → top_k*4
+  (zachowane jako dead code po scroll patchu, nieszkodliwe)
+
+### RAG: semantic dedup po rerankerze [patch_rag_dedup]
+- After reranker: client.retrieve(with_vectors=True) dla research chunks
+- Cosine similarity > 0.92 → odrzuć duplikat
+- Safety net dla cross-URL parafraz
+
+### Garbage patterns: social aggregators [patch_garbage_digg]
+New patterns in _rag_is_garbage():
+- `^\d{6,}\s+\w` — numeric tweet ID + fragment
+- `\|\s*\n\s*[A-Z][a-z]+\s+\w+@\w+` — pipe + @handle
+- `Ask Question\s+No Digg Deeper` — Digg UI
+- `Pos\s+\d+\.\d+%\s+Neg\s+\d+\.\d+%` — sentiment widget
+- `Views\s+-\s+Comments\s+-\s+Reposts` — engagement stats
+- `Most Activity\s+Most ActivityTimeline` — Digg timeline
+- `Expand post\s*\|` — Twitter expand button
+- `^Via\s*$` — standalone Via link
+- `VIEWS\d+\.?\d*[KM]BOOKMARKS\d+` — compact stats
+Additional nav patterns:
+- `Expand post\s+\|\s+\w+@\w+`
+- `^\s*\|\s*$` — lone pipe separator
+- `stories\s*\*\s*github\s*\*\s*rankings` — Digg nav footer
+
+## menus/knowledge/extract.py
+
+### Auto-dedup via reranker [P1]
+- After _extract_facts(), before _review_facts()
+- Scrolls existing chunks for topic_slug from target_col
+- For each new fact: reranker(fact, existing_texts, top_n=1)
+- Score >= 0.85 → auto-odrzuć (było: cosine 0.92 — niewystarczające)
+- Intra-batch dedup: zaakceptowane fakty dodawane do existing_texts
+- If all facts = duplicates -> auto-skip URL without interaction
+- Fallback: jeśli reranker offline → pokazuj wszystkie fakty
+
+Empirical calibration S21:
+- Duplicates (reranker): 0.89 - 0.9998
+- Unique (reranker): 0.04 - 0.70
+- Threshold 0.85: bezpieczny, przepaść 0.19 punkta
+
+## discovery/selector.py
+
+### Model picker: live Ollama fetch [P2]
+- ask_persona_and_model() importuje fetch_ollama_models() + EMBED_FILTER
+  zamiast pustego MODELS dict
+- Lista modeli: live z Ollama /api/tags przy każdym wywołaniu
+- Filtering: EMBED_FILTER usuwa embedding/reranker modele
+- Default: DEFAULT_MODEL z config (qwen3.5:122b)
+- Zwraca (persona_name, model_name_string) zamiast (persona_name, model_key)
+- discovery_run.py linie 1174/1248: MODELS.get(model_key, {}).get("name", model_key)
+  works correctly with model name as key (fallback = model_key)
+
+## data/domains_trusted.json
+
+### Blocked domains [patch_garbage_digg]
+Added to section "blocked":
+- digg.com — Twitter/X aggregator, crawl łapał tweet threads
+- news.ycombinator.com — HN, już filtrowany przez wzorce ale blokada pewniejsza
+
+## Qdrant — wszystkie research_* kolekcje
+
+### item_id keyword index [migrate_payload_index.py]
+- One-time migration: create_payload_index(field_name="item_id", field_schema="keyword")
+- Kolekcje: research_games, research_ai-data, research_hardware,
+            research_software, research_security
+- New collections: _ensure_collection() w research_run.py już tworzy index automatycznie
+- Effect: minimal (scroll patch more important), but HNSW pre-filtering works better
+
+---
+
+## Scoring results S21
+
+| Model | Schema | Patch state | Score |
+|-------|--------|-------------|-------|
+| qwen3.5:35b-a3b | ai_technical | pre-scroll | 7.1 |
+| qwen3.6:27b | ai_technical | scroll | 6.4 |
+| qwen3.5:122b | ai_technical | scroll | 7.1 |
+| qwen3.5:122b | ai_news | scroll, pre-garbage | 7.4 |
+| qwen3.5:122b | ai_news | scroll + garbage | **7.7** |
+
+Project record: 7.7 (previous: 7.7 z S20 przy ai_news + 35b-a3b)
 
 # Date: 2026-06-13
 
