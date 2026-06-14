@@ -4,6 +4,45 @@ All notable changes to NonSequitur are documented here.
 Format: [YYYY-MM-DD] with Added / Fixed / Changed / Removed sections.
 
 ---
+# Date: 2026-06-14
+ 
+**patch_queue_gr.py**
+- Refactored [g] and [r] in menus/queue.py
+- Added helpers: _clear_focus, _run_generate, _reset_to_researched
+- [g] now asks "Reset focus?" if focus is set
+- [r] unified reset+regenerate flow
+**patch_knowledge_add_chunk_idx.py**
+- Retrospective chunk_idx fix for existing knowledge chunks
+- 108 chunks updated: knowledge_ai-data=90, knowledge_games=18, knowledge_evergreen=3 already set
+**patch_extract_chunk_idx.py**
+- Added chunk_idx to _upsert_facts() in extract.py
+- New chunks get sequential chunk_idx automatically
+**patch_feed_paragraph_split.py**
+- Paragraph-aware split in feed.py
+- Target: 2200 chars, para overlap, min 300 chars
+**patch_feed_evergreen_slug.py**
+- Slug prompt added to all evergreen destinations (2/3/4) in _ask_slug_and_category()
+**patch_evergreen_parent_child.py**
+- Parent-child retrieval for knowledge_evergreen
+- chunk_idx ±1 neighbors, filter by (topic_slug, chunk_idx), 0.85 penalty
+**patch_knowledge_parent_child.py + patch_knowledge_pc_url_fix.py**
+- Parent-child retrieval for knowledge_{cat}
+- Filter by (url, chunk_idx)
+- Fixed field order bug: url first, not "source"
+**patch_add_social_observation.py + patch_add_social_observation_v2.py**
+- Added social_observation to DIMENSIONS list in menus/knowledge/feed.py (both lists)
+**patch_config_social_observation.py**
+- Added social_observation to PERSONA_DIMENSIONS in config.py
+- This was the root cause of stats not showing the new dimension
+### Test results
+- knowledge_evergreen parent-child: transformer-architecture slug, 3 chunks retrieved
+- knowledge_ai-data parent-child: +6 chunks, +8 neighbors on live generate
+- Reranker timeout risk at ~85-90 chunks on GTX 1080 — monitor
+### Current persona_lukasz state
+- Total: 53 chunks / 11 dimensions
+- writing_rhythm: 3, argumentation: 6, criticism_style: 6, hype_reaction: 5
+- technical_depth: 4, niche_appreciation: 2, broken_expectation: 2
+- worldview: 3, humor: 8, reference_thinking: 11, social_observation: 3
 # Date: 2026-06-13/2
 
 ## pipeline/generate_run.py
