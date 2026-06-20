@@ -1,4 +1,4 @@
-﻿annotated-doc==0.0.4
+annotated-doc==0.0.4
 annotated-types==0.7.0
 anyio==4.13.0
 babel==2.18.0
@@ -73,6 +73,5 @@ urllib3==2.7.0
 wcwidth==0.7.0
 win10toast==0.9
 win32_setctime==1.2.0
-python-dotenv==1.2.2
  
- 
+ python-dotenv==1.2.2
