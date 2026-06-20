@@ -1,0 +1,530 @@
+{
+  "_comment": "Unified source config -- adapters + RSS feeds per category",
+  "_last_updated": "2026-05-22",
+  "defaults": {
+    "searxng_pages_discovery": 8,
+    "searxng_pages_deep": 10,
+    "discovery_top_n": 100,
+    "discovery_top_n_max": 200,
+    "research_fetch_max": 80,
+    "chunk_size": 800,
+    "chunk_overlap": 100
+  },
+  "categories": {
+    "games": {
+      "sources": [
+        "searxng",
+        "reddit",
+        "google_news"
+      ],
+      "site_boost": [
+        "store.steampowered.com",
+        "ign.com",
+        "polygon.com",
+        "pcgamer.com"
+      ],
+      "rss": [
+        {
+          "url": "https://feeds.ign.com/ign/all",
+          "domain": "ign.com",
+          "trust": "press"
+        },
+        {
+          "url": "https://www.pcgamer.com/rss",
+          "domain": "pcgamer.com",
+          "trust": "press"
+        },
+        {
+          "url": "https://www.eurogamer.net/feed",
+          "domain": "eurogamer.net",
+          "trust": "press"
+        },
+        {
+          "url": "https://www.rockpapershotgun.com/feed",
+          "domain": "rockpapershotgun.com",
+          "trust": "press"
+        },
+        {
+          "url": "https://www.polygon.com/rss/index.xml",
+          "domain": "polygon.com",
+          "trust": "press"
+        },
+        {
+          "url": "https://kotaku.com/rss",
+          "domain": "kotaku.com",
+          "trust": "press"
+        },
+        {
+          "url": "https://www.gamesradar.com/rss/",
+          "domain": "gamesradar.com",
+          "trust": "press"
+        },
+        {
+          "url": "https://www.vg247.com/feed",
+          "domain": "vg247.com",
+          "trust": "press"
+        },
+        {
+          "url": "https://www.gamespot.com/feeds/news",
+          "domain": "gamespot.com",
+          "trust": "press"
+        },
+        {
+          "url": "https://gamerant.com/feed",
+          "domain": "gamerant.com",
+          "trust": "press"
+        },
+        {
+          "url": "https://twinfinite.net/feed",
+          "domain": "twinfinite.net",
+          "trust": "trusted"
+        },
+        {
+          "url": "https://www.escapistmagazine.com/feed",
+          "domain": "escapistmagazine.com",
+          "trust": "trusted"
+        },
+        {
+          "url": "https://www.gamingbolt.com/feed",
+          "domain": "gamingbolt.com",
+          "trust": "trusted"
+        },
+        {
+          "url": "https://www.mmorpg.com/rss.cfm",
+          "domain": "mmorpg.com",
+          "trust": "press"
+        },
+        {
+          "url": "https://store.steampowered.com/feeds/news/",
+          "domain": "store.steampowered.com",
+          "trust": "trusted"
+        }
+      ]
+    },
+    "ai-data": {
+      "sources": [
+        "searxng",
+        "reddit",
+        "google_news",
+        "huggingface"
+      ],
+      "site_boost": [
+        "huggingface.co",
+        "arxiv.org",
+        "openai.com",
+        "anthropic.com"
+      ],
+      "rss": [
+        {
+          "url": "https://feeds.feedburner.com/blogspot/gJZg",
+          "domain": "blog.google",
+          "trust": "press"
+        },
+        {
+          "url": "https://openai.com/blog/rss/",
+          "domain": "openai.com",
+          "trust": "press"
+        },
+        {
+          "url": "https://www.anthropic.com/rss.xml",
+          "domain": "anthropic.com",
+          "trust": "press"
+        },
+        {
+          "url": "https://huggingface.co/blog/feed.xml",
+          "domain": "huggingface.co",
+          "trust": "trusted"
+        },
+        {
+          "url": "https://bdtechtalks.com/feed/",
+          "domain": "bdtechtalks.com",
+          "trust": "trusted"
+        },
+        {
+          "url": "https://arstechnica.com/ai/feed/",
+          "domain": "arstechnica.com",
+          "trust": "press"
+        },
+        {
+          "url": "https://techcrunch.com/category/artificial-intelligence/feed/",
+          "domain": "techcrunch.com",
+          "trust": "press"
+        }
+      ]
+    },
+    "hardware": {
+      "sources": [
+        "searxng",
+        "reddit",
+        "google_news"
+      ],
+      "site_boost": [
+        "tomshardware.com",
+        "techpowerup.com",
+        "nvidia.com",
+        "amd.com"
+      ],
+      "rss": [
+        {
+          "url": "https://www.tomshardware.com/feeds/all",
+          "domain": "tomshardware.com",
+          "trust": "press"
+        },
+        {
+          "url": "https://www.techradar.com/rss",
+          "domain": "techradar.com",
+          "trust": "press"
+        },
+        {
+          "url": "https://www.digitaltrends.com/feed/",
+          "domain": "digitaltrends.com",
+          "trust": "press"
+        },
+        {
+          "url": "https://arstechnica.com/feed/",
+          "domain": "arstechnica.com",
+          "trust": "press"
+        },
+        {
+          "url": "https://wccftech.com/feed/",
+          "domain": "wccftech.com",
+          "trust": "press"
+        },
+        {
+          "url": "https://www.engadget.com/rss.xml",
+          "domain": "engadget.com",
+          "trust": "press"
+        },
+        {
+          "url": "https://www.notebookcheck.net/News.rss",
+          "domain": "notebookcheck.net",
+          "trust": "trusted"
+        }
+      ]
+    },
+    "software": {
+      "sources": [
+        "searxng",
+        "reddit",
+        "google_news"
+      ],
+      "site_boost": [
+        "github.com",
+        "docs.unrealengine.com",
+        "dev.to"
+      ],
+      "rss": [
+        {
+          "url": "https://arstechnica.com/gadgets/feed/",
+          "domain": "arstechnica.com",
+          "trust": "press"
+        },
+        {
+          "url": "https://www.theverge.com/rss/index.xml",
+          "domain": "theverge.com",
+          "trust": "press"
+        },
+        {
+          "url": "https://techcrunch.com/feed/",
+          "domain": "techcrunch.com",
+          "trust": "press"
+        },
+        {
+          "url": "https://www.wired.com/feed/rss",
+          "domain": "wired.com",
+          "trust": "press"
+        },
+        {
+          "url": "https://www.engadget.com/rss.xml",
+          "domain": "engadget.com",
+          "trust": "press"
+        },
+        {
+          "url": "https://www.howtogeek.com/feed/",
+          "domain": "howtogeek.com",
+          "trust": "trusted"
+        },
+        {
+          "url": "https://devblogs.microsoft.com/feed/",
+          "domain": "devblogs.microsoft.com",
+          "trust": "trusted"
+        }
+      ]
+    },
+    "security": {
+      "sources": [
+        "searxng",
+        "reddit",
+        "google_news"
+      ],
+      "site_boost": [
+        "bleepingcomputer.com",
+        "krebsonsecurity.com",
+        "cve.mitre.org",
+        "nvd.nist.gov"
+      ],
+      "rss": [
+        {
+          "url": "https://krebsonsecurity.com/feed/",
+          "domain": "krebsonsecurity.com",
+          "trust": "press"
+        },
+        {
+          "url": "https://www.bleepingcomputer.com/feed/",
+          "domain": "bleepingcomputer.com",
+          "trust": "press"
+        },
+        {
+          "url": "https://threatpost.com/feed/",
+          "domain": "threatpost.com",
+          "trust": "press"
+        },
+        {
+          "url": "https://www.darkreading.com/rss.xml",
+          "domain": "darkreading.com",
+          "trust": "press"
+        },
+        {
+          "url": "https://nakedsecurity.sophos.com/feed/",
+          "domain": "nakedsecurity.sophos.com",
+          "trust": "trusted"
+        }
+      ]
+    },
+    "entertainment": {
+      "sources": [
+        "searxng",
+        "reddit",
+        "google_news"
+      ],
+      "site_boost": [
+        "imdb.com",
+        "rottentomatoes.com",
+        "metacritic.com"
+      ],
+      "rss": [
+        {
+          "url": "https://variety.com/feed/",
+          "domain": "variety.com",
+          "trust": "press"
+        },
+        {
+          "url": "https://deadline.com/feed/",
+          "domain": "deadline.com",
+          "trust": "press"
+        },
+        {
+          "url": "https://www.hollywoodreporter.com/feed/",
+          "domain": "hollywoodreporter.com",
+          "trust": "press"
+        },
+        {
+          "url": "https://collider.com/feed/",
+          "domain": "collider.com",
+          "trust": "trusted"
+        }
+      ]
+    },
+    "photography": {
+      "sources": [
+        "searxng",
+        "reddit"
+      ],
+      "site_boost": [
+        "dpreview.com",
+        "petapixel.com",
+        "dji.com"
+      ],
+      "rss": [
+        {
+          "url": "https://petapixel.com/feed/",
+          "domain": "petapixel.com",
+          "trust": "press"
+        },
+        {
+          "url": "https://www.dpreview.com/news.rss",
+          "domain": "dpreview.com",
+          "trust": "press"
+        },
+        {
+          "url": "https://www.lensrentals.com/blog/feed/",
+          "domain": "lensrentals.com",
+          "trust": "trusted"
+        },
+        {
+          "url": "https://fstoppers.com/feed",
+          "domain": "fstoppers.com",
+          "trust": "trusted"
+        }
+      ]
+    },
+    "drone": {
+      "sources": [
+        "searxng",
+        "reddit"
+      ],
+      "site_boost": [
+        "dji.com",
+        "dpreview.com"
+      ],
+      "rss": [
+        {
+          "url": "https://www.dji.com/blog/rss.xml",
+          "domain": "dji.com",
+          "trust": "trusted"
+        },
+        {
+          "url": "https://dronelife.com/feed/",
+          "domain": "dronelife.com",
+          "trust": "trusted"
+        },
+        {
+          "url": "https://www.suasnews.com/feed/",
+          "domain": "suasnews.com",
+          "trust": "trusted"
+        }
+      ]
+    },
+    "3d": {
+      "sources": [
+        "searxng",
+        "reddit"
+      ],
+      "site_boost": [
+        "blender.org",
+        "docs.blender.org",
+        "80.lv",
+        "cgdirector.com"
+      ],
+      "rss": [
+        {
+          "url": "https://80.lv/feed/",
+          "domain": "80.lv",
+          "trust": "trusted"
+        },
+        {
+          "url": "https://www.blendernation.com/feed/",
+          "domain": "blendernation.com",
+          "trust": "trusted"
+        },
+        {
+          "url": "https://www.cgsociety.org/rss.xml",
+          "domain": "cgsociety.org",
+          "trust": "trusted"
+        }
+      ]
+    },
+    "3d-exterior": {
+      "sources": [
+        "searxng",
+        "reddit"
+      ],
+      "site_boost": [
+        "blender.org",
+        "80.lv"
+      ],
+      "rss": []
+    },
+    "3d-interior": {
+      "sources": [
+        "searxng",
+        "reddit"
+      ],
+      "site_boost": [
+        "blender.org",
+        "80.lv"
+      ],
+      "rss": []
+    },
+    "ai": {
+      "sources": [
+        "searxng",
+        "reddit",
+        "huggingface"
+      ],
+      "site_boost": [
+        "huggingface.co",
+        "stability.ai",
+        "blackforestlabs.ai"
+      ],
+      "rss": [
+        {
+          "url": "https://stability.ai/news/rss",
+          "domain": "stability.ai",
+          "trust": "trusted"
+        },
+        {
+          "url": "https://civitai.com/articles.rss",
+          "domain": "civitai.com",
+          "trust": "trusted"
+        },
+        {
+          "url": "https://huggingface.co/blog/feed.xml",
+          "domain": "huggingface.co",
+          "trust": "trusted"
+        }
+      ]
+    },
+    "portrait-studio": {
+      "sources": [
+        "searxng",
+        "reddit"
+      ],
+      "site_boost": [
+        "petapixel.com",
+        "dpreview.com"
+      ],
+      "rss": []
+    },
+    "macro": {
+      "sources": [
+        "searxng",
+        "reddit"
+      ],
+      "site_boost": [
+        "petapixel.com"
+      ],
+      "rss": []
+    },
+    "portrait-outdoor": {
+      "sources": [
+        "searxng",
+        "reddit"
+      ],
+      "site_boost": [
+        "petapixel.com"
+      ],
+      "rss": []
+    },
+    "product": {
+      "sources": [
+        "searxng",
+        "reddit"
+      ],
+      "site_boost": [
+        "petapixel.com"
+      ],
+      "rss": []
+    },
+    "travel": {
+      "sources": [
+        "searxng",
+        "reddit"
+      ],
+      "site_boost": [
+        "petapixel.com",
+        "dpreview.com"
+      ],
+      "rss": []
+    },
+    "other": {
+      "sources": [
+        "searxng",
+        "reddit",
+        "google_news"
+      ],
+      "site_boost": [],
+      "rss": []
+    }
+  }
+}

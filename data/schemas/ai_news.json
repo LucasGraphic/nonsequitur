@@ -1,0 +1,27 @@
+{
+  "label": "AI news / announcement",
+  "opening_rule": "First sentence: your assessment of whether this announcement actually matters -- not what was announced, not who made it. Max 15 words. Must work as a standalone tweet.",
+  "closing_rule": "Never start the final paragraph with 'In conclusion', 'The definitive assessment', 'Ultimately', 'To summarize', or any phrase that signals a summary. End on a specific observation -- a detail, a consequence, or an irony that follows from the argument. If the technology changes how something fundamental works, use one concrete analogy to make it tangible -- not a cliche.",
+  "sections": [
+    {
+      "name": "What happened",
+      "purpose": "The news itself -- factual, concise, no spin. Who, what, when, how. No interpretation yet."
+    },
+    {
+      "name": "What it means",
+      "purpose": "Practical impact for developers, companies, or end users. Name specific consequences -- not vague 'implications'. If the impact is unclear, say so directly."
+    },
+    {
+      "name": "Industry context",
+      "purpose": "How this fits the current AI landscape and competitive dynamics. Name the players affected and how. Who gains, who loses, who is irrelevant."
+    },
+    {
+      "name": "Why it matters or doesn't",
+      "purpose": "Your verdict on whether this announcement changes anything real. Is the hype justified? Who actually benefits and who is being sold a dream? Take a position -- do not list open questions. If the technology changes how something works at a fundamental level, use one concrete analogy to make it tangible -- not a cliche. Do not write a summary sentence. End on a specific observation, not a verdict formula."
+    }
+  ],
+  "default_length": "medium",
+  "length_short": "600-800 words",
+  "length_medium": "900-1200 words",
+  "length_long": "1200-1600 words"
+}

@@ -1,0 +1,31 @@
+{
+  "label": "Industry analysis / trend piece",
+  "opening_rule": "First sentence: the specific claim being made about where the industry is heading -- not background, not 'the industry is changing'.",
+  "closing_rule": "Final paragraph: name the specific companies, platforms, or audiences that win and lose if this trend continues. No 'only time will tell'. No 'the future remains uncertain'.",
+  "sections": [
+    {
+      "name": "The trend",
+      "purpose": "What is actually happening -- with data, named examples, and a timeframe. Not 'there is a growing interest in X' but 'X has grown from Y to Z since when, driven by these specific forces'."
+    },
+    {
+      "name": "Why now",
+      "purpose": "What changed to make this trend possible or inevitable. Name the specific technological, economic, or cultural shifts. Avoid post-hoc rationalization dressed as analysis."
+    },
+    {
+      "name": "Who is driving it",
+      "purpose": "Name the specific companies, creators, or communities pushing this trend. What are their incentives? Are they aligned with user interests or against them?"
+    },
+    {
+      "name": "Who gets hurt",
+      "purpose": "Every trend has losers. Name them specifically -- companies, job categories, user groups. Do not sanitize this with 'challenges ahead'."
+    },
+    {
+      "name": "Verdict",
+      "purpose": "Is this trend good, bad, or inevitable regardless? Take a position. Name the specific outcome you expect in 2-3 years and why. Do not restate the trend. End on the consequence that most people are not yet talking about."
+    }
+  ],
+  "default_length": "long",
+  "length_short": "1000-1300 words",
+  "length_medium": "1400-1800 words",
+  "length_long": "1800-2400 words"
+}

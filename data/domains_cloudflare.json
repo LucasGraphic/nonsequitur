@@ -1,0 +1,18 @@
+{
+  "_comment": "Domains known to block crawlers via Cloudflare Bot Management.",
+  "_comment2": "Crawl4AI gets empty content or 403 from these. Use as source domains",
+  "_comment3": "for SearXNG ranking (snippets work) but NOT as seed URLs for crawling.",
+  "_comment4": "Edit freely -- add/remove domains as you discover them.",
+  "domains": [
+    "eurogamer.net",
+    "gamesradar.com",
+    "ign.com",
+    "kotaku.com",
+    "pcgamer.com",
+    "polygon.com",
+    "rockpapershotgun.com",
+    "theverge.com",
+    "vg247.com",
+    "wired.com"
+  ]
+}

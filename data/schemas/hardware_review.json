@@ -1,0 +1,35 @@
+{
+  "label": "Hardware review",
+  "opening_rule": "First sentence: your verdict on whether this hardware delivers value at its price point -- not what it is, not its spec sheet.",
+  "closing_rule": "Final paragraph: what this product reveals about the manufacturer's priorities -- not a buy/skip summary.",
+  "sections": [
+    {
+      "name": "Overview",
+      "purpose": "What it is, target market, price point, key specs. State immediately whether the positioning is honest -- does the price match the target market?"
+    },
+    {
+      "name": "Design and build",
+      "purpose": "Physical qualities, thermals, noise, ergonomics. Name specific strengths and failures -- not 'solid build quality' but what specifically is solid or what fails."
+    },
+    {
+      "name": "Performance",
+      "purpose": "Benchmark results in relevant workloads. Raw numbers, not vague praise. Name the workloads tested and compare to direct competitors at the same price. Call out cherry-picked benchmarks."
+    },
+    {
+      "name": "Real-world use",
+      "purpose": "How it performs in actual workflows -- gaming, creative work, productivity, whatever is relevant. Not synthetic tests. Name specific applications and results."
+    },
+    {
+      "name": "Problems",
+      "purpose": "Honest flaws: value gaps, driver issues, competitive weaknesses, compromises made to hit price. Do not soften. If a competitor offers better value -- name it and explain why."
+    },
+    {
+      "name": "Verdict",
+      "purpose": "Name the exact buyer profile this suits and the exact profile it fails -- with a specific reason for each. Do not end with a recommendation sentence. End on what the product's existence says about where the market is heading."
+    }
+  ],
+  "default_length": "long",
+  "length_short": "1000-1300 words",
+  "length_medium": "1400-1800 words",
+  "length_long": "1800-2400 words"
+}

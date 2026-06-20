@@ -1,0 +1,32 @@
+{
+  "label": "Early access / game preview",
+  "note": "EA coverage requires different standards than a full review. Judge the current state, not the promised state.",
+  "opening_rule": "First sentence: whether the current early access build is worth buying now -- not what the finished game might become.",
+  "closing_rule": "Final paragraph: honest assessment of whether the developer can deliver on the roadmap -- based on track record and current build quality, not promises.",
+  "sections": [
+    {
+      "name": "Current state",
+      "purpose": "What exists in the build right now -- content, features, stability. Not what is planned. Be precise about version number and build date if available."
+    },
+    {
+      "name": "Core loop",
+      "purpose": "Is the fundamental gameplay loop already engaging in its current form? If the game requires 'getting good' before it clicks -- say how long that takes and whether it is worth it."
+    },
+    {
+      "name": "Technical state",
+      "purpose": "Performance, bugs, crashes, missing features. Be specific -- frame rates, hardware tested, frequency of issues. EA does not excuse broken fundamentals."
+    },
+    {
+      "name": "Roadmap reality check",
+      "purpose": "What is promised vs what is delivered. Does the developer have a track record of delivering on EA promises? Name examples. Do not treat a roadmap as a guarantee."
+    },
+    {
+      "name": "Buy now or wait",
+      "purpose": "Concrete recommendation based on current state only. Who should buy now and why -- not who might enjoy it when finished. If waiting is the right call, say so directly."
+    }
+  ],
+  "default_length": "medium",
+  "length_short": "800-1000 words",
+  "length_medium": "1100-1400 words",
+  "length_long": "1400-1800 words"
+}

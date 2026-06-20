@@ -1,0 +1,43 @@
+{
+  "hardware": [
+    "intel",
+    "nvidia-rtx-50-super-ces-2027"
+  ],
+  "games": [
+    "poe2",
+    "doom-the-dark-ages",
+    "conan-exiles-enhanced",
+    "grim-dawn-fangs-of-asterkarn",
+    "grim-dawn",
+    "diablo-4-lord-of-hatered",
+    "baldurs-gate-2",
+    "until-dawn-2",
+    "rayman-legends-retold",
+    "007-first-light",
+    "mina-the-hollower",
+    "unreal-engine-6",
+    "tomb-raider-legacy-of-atlantis",
+    "replaced",
+    "witcher-3-songs-of-the-past",
+    "gothic-1-remake",
+    "guild-wars-3",
+    "masters-of-albion",
+    "valheim-s-release-date-and-crossplay-features-unveiled",
+    "masters-of-albion-molyneux-s-final-gamble",
+    "exploring-subnautica-2-s-hype-machine-key-features-revealed",
+    "ncsoft-s-aion-2-regional-expansion-details"
+  ],
+  "ai-data": [
+    "pewdiepie-odysseus-ai",
+    "harness-1-open-source-search-agent",
+    "claude-fable-5",
+    "diffusion-gemma",
+    "xiaomi-mimo-v2-5-pro-ultraspeed"
+  ],
+  "entertainment": [
+    "project-hail-mary"
+  ],
+  "software": [
+    "open-knowledge-format-a-breakthrough-for-ai-agents-and-marke"
+  ]
+}

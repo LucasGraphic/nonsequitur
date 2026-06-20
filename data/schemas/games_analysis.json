@@ -1,0 +1,31 @@
+{
+  "label": "Game analysis / opinion piece",
+  "opening_rule": "First sentence: state the specific argument being made about this game or phenomenon -- not background, not context, not what the game is.",
+  "closing_rule": "Final paragraph: where the argument lands and why it matters beyond this specific game. One concrete claim, defended in 3-5 sentences.",
+  "sections": [
+    {
+      "name": "The argument",
+      "purpose": "Define the specific claim being made. Not 'this game explores X' but 'this game proves X at the expense of Y'. Sharp, falsifiable, defensible."
+    },
+    {
+      "name": "Evidence",
+      "purpose": "Concrete examples from the game supporting the argument. Name specific mechanics, scenes, systems, design decisions. No vague references -- cite what happens and when."
+    },
+    {
+      "name": "Counter-view",
+      "purpose": "Steelman the opposing position honestly. What would someone who disagrees say, and why is that position reasonable? Then explain why you reject it."
+    },
+    {
+      "name": "Broader context",
+      "purpose": "Industry trends, historical precedent, comparable titles. What does this game's approach reveal about the genre, the studio, or the current market? Name specific comparisons."
+    },
+    {
+      "name": "Conclusion",
+      "purpose": "Where the argument lands -- no hedging. State the position and what it means for players, developers, or the industry. Do not restate what was already argued. End on the implication, not the argument."
+    }
+  ],
+  "default_length": "long",
+  "length_short": "1000-1300 words",
+  "length_medium": "1400-1800 words",
+  "length_long": "1800-2400 words"
+}

@@ -1,0 +1,25 @@
+# Python
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Environment
+.env
+
+# Runtime data
+output/
+logs/
+queue.json
+
+# Private
+update/
+
+# Patch backups
+*.bak_*
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini

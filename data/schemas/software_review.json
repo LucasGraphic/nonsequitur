@@ -1,0 +1,35 @@
+{
+  "label": "Software / tool review",
+  "opening_rule": "First sentence: whether this software solves the problem it claims to solve -- not what the software is or who made it.",
+  "closing_rule": "Final paragraph: specific recommendation -- for which workflow, at which price point, compared to which alternative. One sentence that a reader can act on.",
+  "sections": [
+    {
+      "name": "What it does",
+      "purpose": "The problem it solves, the target user, the core feature set. State immediately whether the positioning is accurate or inflated."
+    },
+    {
+      "name": "How it works",
+      "purpose": "Key workflows, UI/UX, integration with existing tools. Name specific friction points and what they cost in time or effort."
+    },
+    {
+      "name": "Performance and reliability",
+      "purpose": "Speed, stability, edge case handling. Name specific failure modes encountered. If it crashes -- say when and how often."
+    },
+    {
+      "name": "Pricing and value",
+      "purpose": "Cost structure -- subscription, one-time, freemium. Is the pricing honest for what is delivered? Name direct competitors and their pricing."
+    },
+    {
+      "name": "Problems",
+      "purpose": "Missing features, bad design decisions, vendor lock-in, privacy concerns. Do not soften. If open-source alternatives exist -- name them."
+    },
+    {
+      "name": "Verdict",
+      "purpose": "For whom is this worth paying for, and at what price point? Name the specific workflow where it wins and the specific workflow where a competitor is better. No generic praise."
+    }
+  ],
+  "default_length": "medium",
+  "length_short": "800-1000 words",
+  "length_medium": "1100-1400 words",
+  "length_long": "1400-1800 words"
+}

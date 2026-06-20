@@ -1,0 +1,23 @@
+{
+  "label": "Generic article",
+  "opening_rule": "First sentence: your sharpest claim about this subject -- not background, not context, not what it is.",
+  "closing_rule": "Final paragraph: one concrete takeaway. No filler, no 'time will tell', no summary of what was already said.",
+  "sections": [
+    {
+      "name": "Introduction",
+      "purpose": "Hook and context. State what this is and why it matters -- from a specific angle, not generically."
+    },
+    {
+      "name": "Main body",
+      "purpose": "Core information, facts, and analysis. Every paragraph must introduce a new argument or fact not covered elsewhere."
+    },
+    {
+      "name": "Conclusion",
+      "purpose": "Verdict or takeaway. No filler phrases. State a position and defend it in 3-5 sentences. Do not restate what was already argued."
+    }
+  ],
+  "default_length": "medium",
+  "length_short": "600-900 words",
+  "length_medium": "1000-1400 words",
+  "length_long": "1400-1900 words"
+}

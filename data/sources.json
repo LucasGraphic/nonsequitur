@@ -1,0 +1,905 @@
+{
+  "_comment": "RSS feed sources per category. Used by fetch_rss_sources() in discovery/sources.py",
+  "_last_updated": "2026-05-29",
+  "games": [
+    {
+      "url": "https://feeds.ign.com/ign/all",
+      "domain": "ign.com",
+      "trust": "press"
+    },
+    {
+      "url": "https://www.pcgamer.com/rss",
+      "domain": "pcgamer.com",
+      "trust": "press"
+    },
+    {
+      "url": "https://www.eurogamer.net/feed",
+      "domain": "eurogamer.net",
+      "trust": "press"
+    },
+    {
+      "url": "https://www.rockpapershotgun.com/feed",
+      "domain": "rockpapershotgun.com",
+      "trust": "press"
+    },
+    {
+      "url": "https://www.polygon.com/rss/index.xml",
+      "domain": "polygon.com",
+      "trust": "press"
+    },
+    {
+      "url": "https://kotaku.com/rss",
+      "domain": "kotaku.com",
+      "trust": "press"
+    },
+    {
+      "url": "https://www.gamesradar.com/rss/",
+      "domain": "gamesradar.com",
+      "trust": "press"
+    },
+    {
+      "url": "https://www.vg247.com/feed",
+      "domain": "vg247.com",
+      "trust": "press"
+    },
+    {
+      "url": "https://www.gamespot.com/feeds/news",
+      "domain": "gamespot.com",
+      "trust": "press"
+    },
+    {
+      "url": "https://gamerant.com/feed",
+      "domain": "gamerant.com",
+      "trust": "press"
+    },
+    {
+      "url": "https://twinfinite.net/feed",
+      "domain": "twinfinite.net",
+      "trust": "trusted"
+    },
+    {
+      "url": "https://www.escapistmagazine.com/feed",
+      "domain": "escapistmagazine.com",
+      "trust": "trusted"
+    },
+    {
+      "url": "https://www.gamingbolt.com/feed",
+      "domain": "gamingbolt.com",
+      "trust": "trusted"
+    },
+    {
+      "url": "https://www.mmorpg.com/rss.cfm",
+      "domain": "mmorpg.com",
+      "trust": "press"
+    },
+    {
+      "url": "https://store.steampowered.com/feeds/news/",
+      "domain": "store.steampowered.com",
+      "trust": "trusted"
+    },
+    {
+      "domain": "metacritic.com",
+      "trust": "press"
+    },
+    {
+      "domain": "insider-gaming.com",
+      "trust": "press"
+    },
+    {
+      "domain": "destructoid.com",
+      "trust": "press"
+    },
+    {
+      "domain": "dualshockers.com",
+      "trust": "press"
+    },
+    {
+      "domain": "vgc.com",
+      "trust": "press"
+    },
+    {
+      "domain": "thegamer.com",
+      "trust": "trusted"
+    },
+    {
+      "domain": "wccftech.com",
+      "trust": "trusted"
+    },
+    {
+      "domain": "pushsquare.com",
+      "trust": "trusted"
+    },
+    {
+      "domain": "nintendolife.com",
+      "trust": "trusted"
+    },
+    {
+      "domain": "sea.ign.com",
+      "trust": "press"
+    },
+    {
+      "domain": "variety.com",
+      "trust": "press"
+    },
+    {
+      "domain": "washingtonpost.com",
+      "trust": "press"
+    },
+    {
+      "domain": "bloomberglaw.com",
+      "trust": "press"
+    }
+  ],
+  "hardware": [
+    {
+      "url": "https://www.tomshardware.com/feeds/all",
+      "domain": "tomshardware.com",
+      "trust": "press"
+    },
+    {
+      "url": "https://www.techradar.com/rss",
+      "domain": "techradar.com",
+      "trust": "press"
+    },
+    {
+      "url": "https://www.digitaltrends.com/feed/",
+      "domain": "digitaltrends.com",
+      "trust": "press"
+    },
+    {
+      "url": "https://arstechnica.com/feed/",
+      "domain": "arstechnica.com",
+      "trust": "press"
+    },
+    {
+      "url": "https://wccftech.com/feed/",
+      "domain": "wccftech.com",
+      "trust": "press"
+    },
+    {
+      "url": "https://www.engadget.com/rss.xml",
+      "domain": "engadget.com",
+      "trust": "press"
+    },
+    {
+      "url": "https://www.notebookcheck.net/News.rss",
+      "domain": "notebookcheck.net",
+      "trust": "trusted"
+    },
+    {
+      "domain": "anandtech.com",
+      "trust": "press"
+    },
+    {
+      "domain": "guru3d.com",
+      "trust": "trusted"
+    },
+    {
+      "domain": "overclock3d.net",
+      "trust": "trusted"
+    },
+    {
+      "domain": "kitguru.net",
+      "trust": "trusted"
+    },
+    {
+      "domain": "hexus.net",
+      "trust": "trusted"
+    },
+    {
+      "domain": "techspot.com",
+      "trust": "press"
+    },
+    {
+      "domain": "pcmag.com",
+      "trust": "press"
+    },
+    {
+      "domain": "pcworld.com",
+      "trust": "press"
+    },
+    {
+      "domain": "semiwiki.com",
+      "trust": "trusted"
+    },
+    {
+      "domain": "siliconangle.com",
+      "trust": "trusted"
+    },
+    {
+      "domain": "theverge.com",
+      "trust": "press"
+    },
+    {
+      "domain": "cnbc.com",
+      "trust": "press"
+    },
+    {
+      "domain": "reuters.com",
+      "trust": "press"
+    },
+    {
+      "domain": "bnnbloomberg.ca",
+      "trust": "press"
+    },
+    {
+      "domain": "fortune.com",
+      "trust": "press"
+    },
+    {
+      "domain": "seekingalpha.com",
+      "trust": "trusted"
+    }
+  ],
+  "ai-data": [
+    {
+      "url": "https://feeds.feedburner.com/blogspot/gJZg",
+      "domain": "blog.google",
+      "trust": "press"
+    },
+    {
+      "url": "https://openai.com/blog/rss/",
+      "domain": "openai.com",
+      "trust": "press"
+    },
+    {
+      "url": "https://www.anthropic.com/rss.xml",
+      "domain": "anthropic.com",
+      "trust": "press"
+    },
+    {
+      "url": "https://huggingface.co/blog/feed.xml",
+      "domain": "huggingface.co",
+      "trust": "trusted"
+    },
+    {
+      "url": "https://bdtechtalks.com/feed/",
+      "domain": "bdtechtalks.com",
+      "trust": "trusted"
+    },
+    {
+      "url": "https://arstechnica.com/ai/feed/",
+      "domain": "arstechnica.com",
+      "trust": "press"
+    },
+    {
+      "url": "https://techcrunch.com/category/artificial-intelligence/feed/",
+      "domain": "techcrunch.com",
+      "trust": "press"
+    },
+    {
+      "url": "http://machinelearningmastery.com/blog/feed",
+      "domain": "machinelearningmastery.com",
+      "trust": "trusted"
+    },
+    {
+      "url": "http://feeds.feedburner.com/AIInTheNews",
+      "domain": "feeds.feedburner.com",
+      "trust": "trusted"
+    },
+    {
+      "url": "https://machinelearnings.co/feed",
+      "domain": "machinelearnings.co",
+      "trust": "trusted"
+    },
+    {
+      "url": "https://blogs.technet.microsoft.com/machinelearning/feed",
+      "domain": "blogs.technet.microsoft.com",
+      "trust": "trusted"
+    },
+    {
+      "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UCEqgmyWChwvt6MFGGlmUQCQ",
+      "domain": "youtube.com",
+      "trust": "trusted"
+    },
+    {
+      "url": "http://www.expertsystem.com/blog/feed",
+      "domain": "expertsystem.com",
+      "trust": "trusted"
+    },
+    {
+      "url": "https://aws.amazon.com/blogs/ai/feed",
+      "domain": "aws.amazon.com",
+      "trust": "trusted"
+    },
+    {
+      "url": "https://medium.com/feed/ai-roadmap-institute",
+      "domain": "medium.com",
+      "trust": "trusted"
+    },
+    {
+      "url": "https://openai.com/feed.xml?format=xml",
+      "domain": "openai.com",
+      "trust": "trusted"
+    },
+    {
+      "url": "https://deepmind.com/blog/feed/basic",
+      "domain": "deepmind.com",
+      "trust": "trusted"
+    },
+    {
+      "url": "https://www.inbenta.com/en/blog/feed",
+      "domain": "inbenta.com",
+      "trust": "trusted"
+    },
+    {
+      "url": "http://blog.clarifai.com/feed",
+      "domain": "blog.clarifai.com",
+      "trust": "trusted"
+    },
+    {
+      "url": "https://blog.playment.io/feed",
+      "domain": "blog.playment.io",
+      "trust": "trusted"
+    },
+    {
+      "url": "https://www.datarobot.com/blog/feed",
+      "domain": "datarobot.com",
+      "trust": "trusted"
+    },
+    {
+      "url": "https://intelligence.org/blog/feed",
+      "domain": "intelligence.org",
+      "trust": "trusted"
+    },
+    {
+      "url": "http://www.sentient.ai/blog/feed",
+      "domain": "sentient.ai",
+      "trust": "trusted"
+    },
+    {
+      "url": "https://medium.com/feed/archieai",
+      "domain": "medium.com",
+      "trust": "trusted"
+    },
+    {
+      "url": "https://www.singularityweblog.com/blog/feed",
+      "domain": "singularityweblog.com",
+      "trust": "trusted"
+    },
+    {
+      "url": "https://iris.ai/feed",
+      "domain": "iris.ai",
+      "trust": "trusted"
+    },
+    {
+      "url": "http://blog.datumbox.com/feed",
+      "domain": "blog.datumbox.com",
+      "trust": "trusted"
+    },
+    {
+      "url": "https://www.youtube.com/feeds/videos.xml?user=MITCSAIL",
+      "domain": "youtube.com",
+      "trust": "trusted"
+    },
+    {
+      "url": "https://mty.ai/feed",
+      "domain": "mty.ai",
+      "trust": "trusted"
+    },
+    {
+      "url": "http://blog.fusemachines.com/feed",
+      "domain": "blog.fusemachines.com",
+      "trust": "trusted"
+    },
+    {
+      "url": "http://blog.marekrosa.org/feeds/posts/default",
+      "domain": "blog.marekrosa.org",
+      "trust": "trusted"
+    },
+    {
+      "url": "https://yseop.com/feed",
+      "domain": "yseop.com",
+      "trust": "trusted"
+    },
+    {
+      "url": "http://www.marketingaiinstitute.com/blog/rss.xml",
+      "domain": "marketingaiinstitute.com",
+      "trust": "trusted"
+    },
+    {
+      "url": "http://rainbird.ai/blog/feed",
+      "domain": "rainbird.ai",
+      "trust": "trusted"
+    },
+    {
+      "url": "http://brighterion.com/feed",
+      "domain": "brighterion.com",
+      "trust": "trusted"
+    },
+    {
+      "url": "http://aiweekly.co/issues.rss",
+      "domain": "aiweekly.co",
+      "trust": "trusted"
+    },
+    {
+      "url": "http://quertle.com/blog/feed",
+      "domain": "quertle.com",
+      "trust": "trusted"
+    },
+    {
+      "url": "http://airesources.blogspot.com/feeds/posts/default?alt=rss",
+      "domain": "airesources.blogspot.com",
+      "trust": "trusted"
+    },
+    {
+      "url": "http://computational-intelligence.blogspot.com/feeds/posts/default",
+      "domain": "computational-intelligence.blogspot.com",
+      "trust": "trusted"
+    },
+    {
+      "url": "http://aiweirdness.com/rss",
+      "domain": "aiweirdness.com",
+      "trust": "trusted"
+    },
+    {
+      "url": "https://becominghuman.ai/feed",
+      "domain": "becominghuman.ai",
+      "trust": "trusted"
+    },
+    {
+      "url": "https://blog.paralleldots.com/feed",
+      "domain": "blog.paralleldots.com",
+      "trust": "trusted"
+    },
+    {
+      "url": "https://www.kdnuggets.com/tag/recurrent-neural-networks/feed",
+      "domain": "kdnuggets.com",
+      "trust": "trusted"
+    },
+    {
+      "url": "https://support.dl.sony.com/blogs/feed",
+      "domain": "support.dl.sony.com",
+      "trust": "trusted"
+    },
+    {
+      "url": "http://www.fast.ai/atom.xml?format=xml",
+      "domain": "fast.ai",
+      "trust": "trusted"
+    },
+    {
+      "url": "https://www.extremetech.com/tag/neural-networks/feed",
+      "domain": "extremetech.com",
+      "trust": "trusted"
+    },
+    {
+      "url": "https://hackaday.com/tag/neural-network/feed",
+      "domain": "hackaday.com",
+      "trust": "trusted"
+    },
+    {
+      "url": "https://ai.intel.com/blog/feed",
+      "domain": "ai.intel.com",
+      "trust": "trusted"
+    },
+    {
+      "url": "http://blog.hackerearth.com/machine-learning/feed",
+      "domain": "blog.hackerearth.com",
+      "trust": "trusted"
+    },
+    {
+      "url": "https://blog.openai.com/rss",
+      "domain": "blog.openai.com",
+      "trust": "trusted"
+    },
+    {
+      "url": "http://bair.berkeley.edu/blog/feed.xml",
+      "domain": "bair.berkeley.edu",
+      "trust": "trusted"
+    },
+    {
+      "url": "http://www.wildml.com/feed/?x=1",
+      "domain": "wildml.com",
+      "trust": "trusted"
+    },
+    {
+      "url": "https://distill.pub/rss.xml",
+      "domain": "distill.pub",
+      "trust": "trusted"
+    },
+    {
+      "url": "https://blog.paperspace.com/feed",
+      "domain": "blog.paperspace.com",
+      "trust": "trusted"
+    },
+    {
+      "url": "https://data-flair.training/blogs/category/machine-learning/feed",
+      "domain": "data-flair.training",
+      "trust": "trusted"
+    },
+    {
+      "url": "http://unsupervisedthinkingpodcast.blogspot.com/feeds/posts/default?alt=rss",
+      "domain": "unsupervisedthinkingpodcast.blogspot.com",
+      "trust": "trusted"
+    },
+    {
+      "url": "http://mydeeplearning.blogspot.com/feeds/posts/default?alt=rss",
+      "domain": "mydeeplearning.blogspot.com",
+      "trust": "trusted"
+    },
+    {
+      "url": "http://machinethink.net/blog/index.xml",
+      "domain": "machinethink.net",
+      "trust": "trusted"
+    },
+    {
+      "url": "https://computationalbiologyblog.com/feed",
+      "domain": "computationalbiologyblog.com",
+      "trust": "trusted"
+    },
+    {
+      "url": "https://amundtveit.com/category/convolutional-neural-network/feed",
+      "domain": "amundtveit.com",
+      "trust": "trusted"
+    },
+    {
+      "url": "http://blog.wtf.sg/feed",
+      "domain": "blog.wtf.sg",
+      "trust": "trusted"
+    },
+    {
+      "url": "https://leedsneuralnetworks.wordpress.com/blog/feed",
+      "domain": "leedsneuralnetworks.wordpress.com",
+      "trust": "trusted"
+    },
+    {
+      "url": "https://provalisresearch.com/feed",
+      "domain": "provalisresearch.com",
+      "trust": "trusted"
+    },
+    {
+      "url": "http://blog.aylien.com/rss",
+      "domain": "blog.aylien.com",
+      "trust": "trusted"
+    },
+    {
+      "url": "https://www.rosette.com/feed",
+      "domain": "rosette.com",
+      "trust": "trusted"
+    },
+    {
+      "url": "https://www.meaningcloud.com/blog/feed",
+      "domain": "meaningcloud.com",
+      "trust": "trusted"
+    },
+    {
+      "url": "https://www.lexalytics.com/lexablog/feed",
+      "domain": "lexalytics.com",
+      "trust": "trusted"
+    },
+    {
+      "url": "https://blog.bitext.com/rss.xml",
+      "domain": "blog.bitext.com",
+      "trust": "trusted"
+    },
+    {
+      "url": "https://www.scibite.com/feed",
+      "domain": "scibite.com",
+      "trust": "trusted"
+    },
+    {
+      "url": "https://discovertext.com/blog/feed",
+      "domain": "discovertext.com",
+      "trust": "trusted"
+    },
+    {
+      "url": "https://www.searchblox.com/blog/feed",
+      "domain": "searchblox.com",
+      "trust": "trusted"
+    },
+    {
+      "url": "http://www.nactem.ac.uk/rss_featured.php",
+      "domain": "nactem.ac.uk",
+      "trust": "trusted"
+    },
+    {
+      "url": "https://www.linguamatics.com/blog/rss-feed",
+      "domain": "linguamatics.com",
+      "trust": "trusted"
+    },
+    {
+      "url": "http://odintext.com/blog/feed",
+      "domain": "odintext.com",
+      "trust": "trusted"
+    },
+    {
+      "url": "https://www.keatext.ai/customer-experience-insights/feed",
+      "domain": "keatext.ai",
+      "trust": "trusted"
+    },
+    {
+      "url": "https://www.feedbackferret.com/news/feed",
+      "domain": "feedbackferret.com",
+      "trust": "trusted"
+    },
+    {
+      "url": "https://gate4ugc.blogspot.com/feeds/posts/default?alt=rss",
+      "domain": "gate4ugc.blogspot.com",
+      "trust": "trusted"
+    },
+    {
+      "url": "https://paulhcleverley.com/feed",
+      "domain": "paulhcleverley.com",
+      "trust": "trusted"
+    },
+    {
+      "domain": "venturebeat.com",
+      "trust": "press"
+    },
+    {
+      "domain": "thenextweb.com",
+      "trust": "press"
+    },
+    {
+      "domain": "zdnet.com",
+      "trust": "press"
+    },
+    {
+      "domain": "wired.com",
+      "trust": "press"
+    },
+    {
+      "domain": "theverge.com",
+      "trust": "press"
+    },
+    {
+      "domain": "semafor.com",
+      "trust": "press"
+    },
+    {
+      "domain": "404media.co",
+      "trust": "press"
+    },
+    {
+      "domain": "simonwillison.net",
+      "trust": "trusted"
+    },
+    {
+      "domain": "gizmodo.com",
+      "trust": "trusted"
+    },
+    {
+      "domain": "cnbc.com",
+      "trust": "press"
+    },
+    {
+      "domain": "reuters.com",
+      "trust": "press"
+    },
+    {
+      "domain": "bloomberg.com",
+      "trust": "press"
+    },
+    {
+      "domain": "marktechpost.com",
+      "trust": "trusted"
+    }
+  ],
+  "software": [
+    {
+      "url": "https://arstechnica.com/gadgets/feed/",
+      "domain": "arstechnica.com",
+      "trust": "press"
+    },
+    {
+      "url": "https://www.theverge.com/rss/index.xml",
+      "domain": "theverge.com",
+      "trust": "press"
+    },
+    {
+      "url": "https://techcrunch.com/feed/",
+      "domain": "techcrunch.com",
+      "trust": "press"
+    },
+    {
+      "url": "https://www.wired.com/feed/rss",
+      "domain": "wired.com",
+      "trust": "press"
+    },
+    {
+      "url": "https://www.engadget.com/rss.xml",
+      "domain": "engadget.com",
+      "trust": "press"
+    },
+    {
+      "url": "https://www.howtogeek.com/feed/",
+      "domain": "howtogeek.com",
+      "trust": "trusted"
+    },
+    {
+      "url": "https://devblogs.microsoft.com/feed/",
+      "domain": "devblogs.microsoft.com",
+      "trust": "trusted"
+    },
+    {
+      "domain": "9to5mac.com",
+      "trust": "trusted"
+    },
+    {
+      "domain": "macrumors.com",
+      "trust": "trusted"
+    },
+    {
+      "domain": "bleepingcomputer.com",
+      "trust": "press"
+    },
+    {
+      "domain": "zdnet.com",
+      "trust": "press"
+    },
+    {
+      "domain": "pcmag.com",
+      "trust": "press"
+    },
+    {
+      "domain": "infoworld.com",
+      "trust": "trusted"
+    }
+  ],
+  "security": [
+    {
+      "url": "https://krebsonsecurity.com/feed/",
+      "domain": "krebsonsecurity.com",
+      "trust": "press"
+    },
+    {
+      "url": "https://www.bleepingcomputer.com/feed/",
+      "domain": "bleepingcomputer.com",
+      "trust": "press"
+    },
+    {
+      "url": "https://threatpost.com/feed/",
+      "domain": "threatpost.com",
+      "trust": "press"
+    },
+    {
+      "url": "https://www.darkreading.com/rss.xml",
+      "domain": "darkreading.com",
+      "trust": "press"
+    },
+    {
+      "url": "https://nakedsecurity.sophos.com/feed/",
+      "domain": "nakedsecurity.sophos.com",
+      "trust": "trusted"
+    },
+    {
+      "domain": "wired.com",
+      "trust": "press"
+    },
+    {
+      "domain": "arstechnica.com",
+      "trust": "press"
+    },
+    {
+      "domain": "zdnet.com",
+      "trust": "press"
+    },
+    {
+      "domain": "theregister.com",
+      "trust": "press"
+    },
+    {
+      "domain": "securityweek.com",
+      "trust": "trusted"
+    },
+    {
+      "domain": "helpnetsecurity.com",
+      "trust": "trusted"
+    }
+  ],
+  "entertainment": [
+    {
+      "url": "https://variety.com/feed/",
+      "domain": "variety.com",
+      "trust": "press"
+    },
+    {
+      "url": "https://deadline.com/feed/",
+      "domain": "deadline.com",
+      "trust": "press"
+    },
+    {
+      "url": "https://www.hollywoodreporter.com/feed/",
+      "domain": "hollywoodreporter.com",
+      "trust": "press"
+    },
+    {
+      "url": "https://collider.com/feed/",
+      "domain": "collider.com",
+      "trust": "trusted"
+    },
+    {
+      "domain": "ign.com",
+      "trust": "press"
+    },
+    {
+      "domain": "thewrap.com",
+      "trust": "press"
+    },
+    {
+      "domain": "indiewire.com",
+      "trust": "press"
+    },
+    {
+      "domain": "screenrant.com",
+      "trust": "trusted"
+    },
+    {
+      "domain": "cbr.com",
+      "trust": "trusted"
+    }
+  ],
+  "photography": [
+    {
+      "url": "https://petapixel.com/feed/",
+      "domain": "petapixel.com",
+      "trust": "press"
+    },
+    {
+      "url": "https://www.dpreview.com/news.rss",
+      "domain": "dpreview.com",
+      "trust": "press"
+    },
+    {
+      "url": "https://www.lensrentals.com/blog/feed/",
+      "domain": "lensrentals.com",
+      "trust": "trusted"
+    },
+    {
+      "url": "https://fstoppers.com/feed",
+      "domain": "fstoppers.com",
+      "trust": "trusted"
+    }
+  ],
+  "drone": [
+    {
+      "url": "https://www.dji.com/blog/rss.xml",
+      "domain": "dji.com",
+      "trust": "trusted"
+    },
+    {
+      "url": "https://dronelife.com/feed/",
+      "domain": "dronelife.com",
+      "trust": "trusted"
+    },
+    {
+      "url": "https://www.suasnews.com/feed/",
+      "domain": "suasnews.com",
+      "trust": "trusted"
+    }
+  ],
+  "3d": [
+    {
+      "url": "https://80.lv/feed/",
+      "domain": "80.lv",
+      "trust": "trusted"
+    },
+    {
+      "url": "https://www.blendernation.com/feed/",
+      "domain": "blendernation.com",
+      "trust": "trusted"
+    },
+    {
+      "url": "https://www.cgsociety.org/rss.xml",
+      "domain": "cgsociety.org",
+      "trust": "trusted"
+    }
+  ],
+  "ai": [
+    {
+      "url": "https://stability.ai/news/rss",
+      "domain": "stability.ai",
+      "trust": "trusted"
+    },
+    {
+      "url": "https://civitai.com/articles.rss",
+      "domain": "civitai.com",
+      "trust": "trusted"
+    },
+    {
+      "url": "https://huggingface.co/blog/feed.xml",
+      "domain": "huggingface.co",
+      "trust": "trusted"
+    }
+  ]
+}

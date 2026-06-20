@@ -1,0 +1,65 @@
+{
+  "_comment": "Tags from lucasgraphic.com -- slugs must match PayloadCMS tag slugs exactly. Update when new tags are added to the site.",
+  "_source": "https://lucasgraphic.com/tags sitemap",
+  "_updated": "2026-05-19",
+
+  "games": [
+    "co-op", "rpg", "survival", "action-rpg", "roguelike", "mmorpg", "fps",
+    "open-world", "soulslike", "shooter", "pvp", "hack-and-slash", "multiplayer",
+    "mmo", "action", "action-adventure", "adventure", "city-builder", "strategy",
+    "dungeon-crawler", "extraction-shooter", "looter-shooter", "pixel-art",
+    "boomershooter", "free-to-play", "retro", "witcher4", "steam"
+  ],
+
+  "ai-data": [
+    "nvidia", "openai", "google", "amd", "chatgpt", "gemini", "deepseek", "qwen",
+    "anthropic", "claude", "comfyui", "local-ai", "deepmind", "alibaba", "microsoft",
+    "grok", "elon-musk", "meta", "bytedance", "minimax", "kimi", "moonshot", "z-ai",
+    "perplexity", "huawei", "palantir", "opensource", "ai", "flux"
+  ],
+
+  "hardware": [
+    "nvidia", "amd", "intel", "apple", "microsoft", "directx", "windows", "linux",
+    "android", "sony", "playstation"
+  ],
+
+  "software": [
+    "ue", "ue5", "unity6", "directx", "windows", "linux", "android", "adobe",
+    "cloudflare", "microsoft", "opensource", "steam", "social-media", "privacy",
+    "facebook", "youtube", "intel", "apple", "sony", "playstation", "google"
+  ],
+
+  "security": [
+    "privacy", "cloudflare", "microsoft", "google", "apple", "opensource"
+  ],
+
+  "entertainment": [
+    "social-media", "youtube", "facebook", "meta", "elon-musk", "music",
+    "cartoons", "retro", "scene"
+  ],
+
+  "photography": [
+    "norway", "buskerud", "ovre-eiker", "hokksund", "vestfossen", "drammen",
+    "lier", "modum", "skotselv", "spain", "mallorca", "costa-blanca", "denia",
+    "valencia", "portugal", "vila-nova-de-gaia"
+  ],
+
+  "drone": [
+    "norway", "buskerud", "ovre-eiker", "hokksund", "vestfossen", "drammen",
+    "lier", "modum", "skotselv", "spain", "mallorca"
+  ],
+
+  "3d": [
+    "ue", "ue5", "unity6", "blender", "nvidia", "amd"
+  ],
+
+  "ai": [
+    "comfyui", "flux", "nvidia", "amd", "stable-diffusion", "ai",
+    "local-ai", "anthropic", "openai"
+  ],
+
+  "global": [
+    "opensource", "privacy", "social-media", "microsoft", "google",
+    "apple", "nvidia", "ai"
+  ]
+}

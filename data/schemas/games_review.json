@@ -1,0 +1,35 @@
+{
+  "label": "Game review",
+  "opening_rule": "First sentence: your verdict on whether this game delivers on its core promise -- not what the game is, not who made it, not the release date.",
+  "closing_rule": "Final paragraph: what this game reveals about its developer, its genre, or its audience -- not who should buy it. No buy/skip binary.",
+  "sections": [
+    {
+      "name": "Overview",
+      "purpose": "What kind of game, who made it, what it promises. State your immediate verdict in the last sentence -- not a summary of what follows, but your actual position on whether the promise is kept."
+    },
+    {
+      "name": "Gameplay",
+      "purpose": "Core loop, mechanics, feel. Name specific systems and explain why they work or fail. No generic praise -- if combat is good, say exactly what makes it good and for whom. If it fails, name the specific failure mode."
+    },
+    {
+      "name": "Presentation",
+      "purpose": "Visuals, audio, performance, technical state at launch. Name specific strengths and failures with concrete examples. If performance is bad -- state the hardware context, the frequency of crashes, the specific systems affected."
+    },
+    {
+      "name": "Content",
+      "purpose": "Length in hours, modes, replayability, progression systems. Give real numbers where available. State whether the content justifies the price -- with a reason, not a platitude."
+    },
+    {
+      "name": "Problems",
+      "purpose": "Honest critique: bugs, design flaws, cut corners, broken promises. Do not soften. If a system is broken -- say it is broken and explain exactly why. If the story is weak -- name what specifically fails, not just that it disappoints."
+    },
+    {
+      "name": "Verdict",
+      "purpose": "What this game is for and what it fails at -- not a buy/skip binary. Name the specific player who gets full value and why. End on what makes this game memorable or forgettable -- not a recommendation sentence."
+    }
+  ],
+  "default_length": "long",
+  "length_short": "1000-1300 words",
+  "length_medium": "1400-1800 words",
+  "length_long": "1800-2400 words"
+}

@@ -1,0 +1,31 @@
+{
+  "label": "Film / series / book review",
+  "opening_rule": "First sentence: your verdict -- not what it is, not who made it, not the plot. Is it worth your time or not, and why in one specific claim. Max 20 words. Must work as a standalone opinion.",
+  "closing_rule": "Final paragraph: name the specific audience that will love this and the specific audience that will bounce off it. No 'if you enjoy X you might like this'. Be direct. End on the one thing that will stick with you in six months -- or won't.",
+  "sections": [
+    {
+      "name": "The verdict upfront",
+      "purpose": "Your overall assessment in 2-3 sentences. Does it deliver what it promises? Is the hype justified? Take a position immediately -- do not build to it."
+    },
+    {
+      "name": "What it actually is",
+      "purpose": "One paragraph. Genre, format, runtime, premise -- factual, no spin. Distinguish what the marketing says from what the thing actually is. If it was sold as one thing and is another, say so."
+    },
+    {
+      "name": "What works",
+      "purpose": "Name specific scenes, characters, writing decisions, technical choices that succeed. Not 'the acting is great' -- name who, name the scene, name why it works. Minimum two specific examples."
+    },
+    {
+      "name": "What does not work",
+      "purpose": "Name specific failures -- pacing, plot holes, tonal inconsistency, missed opportunities. Every release has them. If this one genuinely has none, explain why that itself is unusual. Do not sanitize criticism."
+    },
+    {
+      "name": "Why it matters or does not",
+      "purpose": "Does this change anything in its genre or medium? Is it a landmark or a competent entry? Compare to one or two specific predecessors -- not to 'similar films in the genre'. If the industry or cultural context makes this release significant beyond its quality, explain that specifically."
+    }
+  ],
+  "default_length": "medium",
+  "length_short": "600-900 words",
+  "length_medium": "1000-1400 words",
+  "length_long": "1400-1800 words"
+}

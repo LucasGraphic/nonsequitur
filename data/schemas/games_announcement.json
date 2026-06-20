@@ -1,0 +1,32 @@
+{
+  "label": "Game announcement / reveal",
+  "note": "Short by design -- announcements have limited confirmed facts. Do NOT pad with speculation or wishlists.",
+  "opening_rule": "First sentence: your immediate reaction to this announcement -- excitement, skepticism, or indifference -- with one concrete reason.",
+  "closing_rule": "Final paragraph: honest assessment of the announcement itself, not the hypothetical game. What does this reveal about the studio's direction?",
+  "sections": [
+    {
+      "name": "What was announced",
+      "purpose": "Confirmed facts only: title, developer, publisher, platform, release window if stated. No speculation dressed as fact."
+    },
+    {
+      "name": "What we know so far",
+      "purpose": "Gameplay details, setting, features -- only from official sources or confirmed leaks. If a detail is unconfirmed, say so explicitly."
+    },
+    {
+      "name": "Context",
+      "purpose": "Where this fits: franchise history, studio track record, market positioning. Name comparable titles and whether the track record inspires confidence."
+    },
+    {
+      "name": "Known unknowns",
+      "purpose": "Key facts not yet confirmed: price, exact date, gameplay footage, engine, multiplayer. State them as open questions -- no speculation about what they might be."
+    },
+    {
+      "name": "Our take",
+      "purpose": "Brief honest opinion on the announcement itself -- not the game we haven't played. Is this worth following? Why? One clear position, no hedging."
+    }
+  ],
+  "default_length": "short",
+  "length_short": "500-700 words",
+  "length_medium": "700-900 words",
+  "length_long": "900-1200 words"
+}

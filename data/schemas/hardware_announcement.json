@@ -1,0 +1,36 @@
+{
+  "label": "Hardware announcement / rumor / leak",
+  "note": "Pre-release coverage only. No benchmarks exist yet. Separate confirmed facts from rumors -- never present speculation as fact.",
+  "opening_rule": "First sentence: your immediate credibility assessment of this announcement or rumor -- not what was announced, not the spec sheet.",
+  "closing_rule": "Final paragraph: honest verdict on whether this is worth following -- based on source credibility and historical patterns, not on spec excitement.",
+  "sections": [
+    {
+      "name": "What was announced or leaked",
+      "purpose": "Confirmed facts only: product name, tier, source of the information, announcement date or leak date. State immediately whether the source is credible -- name it and explain why it is or isn't reliable."
+    },
+    {
+      "name": "Specs and positioning",
+      "purpose": "What is claimed: specs, price range, target market, release window. Clearly label each claim as confirmed, rumored, or speculated. Do not present unconfirmed specs as fact."
+    },
+    {
+      "name": "Historical context",
+      "purpose": "How this fits the manufacturer's product cycle, naming conventions, and release cadence. Name comparable previous launches and whether the timeline is consistent with past patterns."
+    },
+    {
+      "name": "Market implications",
+      "purpose": "What this means for competitors, current-gen pricing, and buyers considering a purchase now. Name specific competing products and the realistic impact on their value proposition."
+    },
+    {
+      "name": "Known unknowns",
+      "purpose": "Key facts not yet confirmed: exact specs, price, availability, performance vs current gen. State them as open questions -- no speculation dressed as analysis."
+    },
+    {
+      "name": "Worth watching or noise",
+      "purpose": "Brief honest verdict on the announcement itself -- not the hypothetical product. Is the source credible enough to act on? Should buyers wait? One clear position, no hedging."
+    }
+  ],
+  "default_length": "medium",
+  "length_short": "600-800 words",
+  "length_medium": "900-1200 words",
+  "length_long": "1200-1600 words"
+}
