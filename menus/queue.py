@@ -366,10 +366,15 @@ def _fmt_list(items: list, show_hints: bool = True) -> None:
         # Scoring display -- read from queue cache fields
         _sv = item.get("scoring_verdict", "")
         _ss = item.get("scoring_score")
+        _VERDICT_SHORT = {
+            "excellent": "EXCE", "strong": "STRO", "pass": "PASS",
+            "weak": "WEAK", "fail": "FAIL", "unknown": "???",
+        }
+        _sv_label = _VERDICT_SHORT.get(_sv.lower(), _sv[:4].upper()) if _sv else ""
         if _ss is not None and _sv:
-            score_col = f"{_ss}/{_sv[:4]}"
+            score_col = f"{_ss}/{_sv_label}"
         elif _sv:
-            score_col = f"?/{_sv[:4]}"
+            score_col = f"?/{_sv_label}"
         else:
             score_col = "-"
 

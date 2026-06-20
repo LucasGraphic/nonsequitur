@@ -135,13 +135,17 @@ ANCHOR is the CEILING -- the score can only go down from here.
 3. Subtract -0.5 for each G signal marked PRESENT (genericity penalty)
 4. Clamp to 0-10
 5. If any D marked present -> verdict = fail (regardless of score)
-6. If no D present AND score >= 7.0 -> verdict = pass
-7. If no D present AND score < 7.0 -> verdict = weak
+6. If no D present AND score >= 9.0 -> verdict = excellent
+7. If no D present AND score >= 8.0 -> verdict = strong
+8. If no D present AND score >= 7.0 -> verdict = pass
+9. If no D present AND score < 7.0  -> verdict = weak
 
 Recommendation:
-  fail -> regenerate
-  weak -> rewrite
-  pass -> ready
+  fail      -> regenerate
+  weak      -> rewrite
+  pass      -> ready
+  strong    -> ready
+  excellent -> ready
 
 ======================================================================
 FINAL OUTPUT
@@ -180,7 +184,7 @@ V1: <consistent|fades|absent>
 V2: <section name or n/a>
 CONFIDENCE: <high|medium|low>
 CONFIDENCE_REASON: <one sentence>
-VERDICT: <pass|fail|weak>
+VERDICT: <excellent|strong|pass|weak|fail>
 SCORE: <0-10>
 ISSUES: <max 3 specific problems semicolon-separated, or "none">
 RECOMMENDATION: <ready|rewrite|regenerate>
@@ -340,7 +344,7 @@ def _parse_scoring_response(text: str) -> dict:
         # Final verdict
         elif lower.startswith("verdict:"):
             v = line.split(":",1)[1].strip().lower()
-            if v in ("pass", "fail", "weak"):
+            if v in ("excellent", "strong", "pass", "weak", "fail"):
                 result["verdict"] = v
 
         elif lower.startswith("score:"):
@@ -385,6 +389,8 @@ def _parse_scoring_response(text: str) -> dict:
             result["verdict"] = "fail"
             if result["recommendation"] == "ready":
                 result["recommendation"] = "regenerate"
+        elif _q_present >= 6 and _g_present == 0:
+            result["verdict"] = "strong"
         elif _q_present >= 4 and _g_present == 0:
             result["verdict"] = "pass"
         elif _q_present >= 2:
@@ -561,7 +567,7 @@ def score_article(
     _update_metadata(metadata_path, scoring)
 
     score_str = f"{scoring['score']}/10" if scoring["score"] is not None else "?"
-    flag_str  = "  [FLAGGED]" if scoring["verdict"] in ("fail", "weak") else ""
+    flag_str  = "  [FLAGGED]" if scoring["verdict"] in ("fail", "weak") else ("  [STRONG]" if scoring["verdict"] == "strong" else ("  [EXCELLENT]" if scoring["verdict"] == "excellent" else ""))
     print(f"   [scoring] {scoring['verdict'].upper()}  score={score_str}  rec={scoring['recommendation']}{flag_str}")
     if scoring["issues"]:
         for issue in scoring["issues"]:
