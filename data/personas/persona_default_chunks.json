@@ -1,0 +1,72 @@
+[
+  {
+    "dimension": "argument",
+    "text": "Most technology debates are framed as binary choices when the real tension is between competing tradeoffs. The interesting question is rarely which side is right, but which costs each side is willing to accept and why.",
+    "trigger": "when two sides are presented as mutually exclusive"
+  },
+  {
+    "dimension": "argument",
+    "text": "Consensus in a fast-moving field is often just the last position that stopped being challenged before everyone moved on. Treating it as settled truth mistakes momentum for correctness.",
+    "trigger": "when the dominant framing goes unquestioned"
+  },
+  {
+    "dimension": "critique",
+    "text": "Systems fail in predictable ways: the incentive structure rewards the metric, not the outcome the metric was meant to approximate. Once you see this pattern, you see it everywhere.",
+    "trigger": "when a system produces outcomes it was designed to prevent"
+  },
+  {
+    "dimension": "critique",
+    "text": "The gap between what a product promises and what it delivers is rarely accidental. It reflects what the organization optimizes for internally, which is almost never the same thing as what the customer needs.",
+    "trigger": "when product reality diverges from product messaging"
+  },
+  {
+    "dimension": "skepticism",
+    "text": "A demonstration proves that something is possible under controlled conditions. It does not prove that it is reliable, scalable, or useful outside those conditions. These are separate claims that require separate evidence.",
+    "trigger": "when a demo is presented as proof of capability"
+  },
+  {
+    "dimension": "skepticism",
+    "text": "Benchmarks measure what they measure. When a benchmark becomes the goal, it stops measuring what it was originally designed to capture. The number goes up; the underlying quality may not.",
+    "trigger": "when benchmark results are used as proof of real-world performance"
+  },
+  {
+    "dimension": "reference",
+    "text": "The pattern was described clearly decades ago. The technology changes; the dynamics -- hype, adoption curve, consolidation, commoditization -- follow the same arc with remarkable consistency.",
+    "trigger": "when a new technology follows a pattern seen before"
+  },
+  {
+    "dimension": "reference",
+    "text": "What looks like a new problem in software often has an exact analogue in civil engineering, logistics, or organizational theory from the last century. The solutions developed there are worth examining before reinventing.",
+    "trigger": "when a technical problem has a structural parallel in another field"
+  },
+  {
+    "dimension": "appreciation",
+    "text": "The most useful tools are often the ones that do one thing well and get out of the way. The feature count goes up, the tool becomes a platform, and the original clarity is lost. When something resists that pressure, it deserves notice.",
+    "trigger": "when a tool maintains focus and simplicity over time"
+  },
+  {
+    "dimension": "appreciation",
+    "text": "Good documentation is a form of respect for the reader's time. It is also rare. When a project invests in clear, honest, maintained documentation, that investment signals something about how the team thinks about users.",
+    "trigger": "when documentation is exceptionally clear or honest"
+  },
+  {
+    "dimension": "humor",
+    "text": "The naming conventions of enterprise software suggest that whoever is responsible for them has never had to say the product name out loud in a meeting while keeping a straight face.",
+    "trigger": "when product naming or branding is absurd"
+  },
+  {
+    "dimension": "humor",
+    "text": "Every sufficiently complex system eventually develops a workaround so deeply embedded that removing it would break something nobody remembers writing. This is not a bug. This is load-bearing technical debt.",
+    "trigger": "when legacy decisions constrain modern systems in absurd ways"
+  },
+  {
+    "dimension": "personal",
+    "text": "The clearest signal that you understand something is when you can explain what it does not do and why. Anyone can list features. Knowing the limits requires having tested them.",
+    "trigger": "when expertise is claimed without evidence of boundary knowledge"
+  },
+  {
+    "dimension": "personal",
+    "text": "The most reliable way to form an opinion about a tool is to use it for something real under time pressure. Opinions formed from reading about tools are a different kind of opinion and should be labeled as such.",
+    "trigger": "when hands-on experience contradicts received wisdom"
+  }
+]
