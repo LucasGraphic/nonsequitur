@@ -30,10 +30,10 @@ NonSequitur was built for and by someone who already runs a home lab — two or 
 
 - You want a working system in an afternoon
 - You have one machine and plan to run everything on it (possible, but painful — the architecture assumes network separation)
-- You expect the persona system to work out of the box (it won't — you have to build it yourself from your own writing)
+- You expect the persona system to work out of the box (it won't — you have to build it from your own writing, and that takes time)
 - You want a UI (there isn't one — it's a terminal application)
 
-This is a tool built by one person for their own use, published because the architecture decisions might be useful to others. The code is not polished for external consumption. There is no installer, no Docker Compose that actually works end-to-end, no support channel.
+This is a tool built by one person for their own use, published because the architecture decisions might be useful to others. The code is not polished for external consumption. There is no installer, no Docker Compose that works end-to-end, no support channel. If something breaks, reading the source is the intended path forward.
 
 ---
 
@@ -49,7 +49,7 @@ The system is a fully autonomous content pipeline with a human in the editorial 
 6. **Validates the focus** — BM25 + LLM check: is the focus falsifiable, declarative, and supported by research?
 7. **Generates** 800–2400 word articles with enforced thesis, persona voice injection, and neural reranking of research context
 8. **Scores** the result — 8-phase scoring pass with quality signals, disqualifiers, and a concrete prescription for improvement
-9. **Optionally rewrites** with Claude Sonnet for editorial polish
+9. **Optionally rewrites** via API — Claude Sonnet, Gemini, Groq, DeepSeek, or local Ollama for editorial polish
 
 The result: one person running a content operation that would typically require a research team, with full editorial control and zero cloud dependency in the core pipeline.
 
@@ -58,8 +58,8 @@ The result: one person running a content operation that would typically require 
 ## Architecture
 
 ```
-Discovery ──► Research ──► Schema ──► Focus ──► Generate ──► Score ──► Claude Rewrite
-   │              │         Suggest    Picker       │           │          (optional)
+Discovery ──► Research ──► Schema ──► Focus ──► Generate ──► Score ──► API Rewrite
+   │              │         Suggest    Picker       │           │         (optional)
 SearXNG        Qdrant      BM25+LLM   BM25+LLM   Ollama     qwen3.6
 Reddit         Crawl4AI               Validator   qwen3.6    27b
 Google News    Reranker                           27b/122b   (think=True)
@@ -83,7 +83,7 @@ Google News    Reranker                           27b/122b   (think=True)
 
 **8. Scoring Pass** — `qwen3.6:27b` (think=True) scores the generated article on 8 phases: anchor ceiling, argument structure (A1–A4), disqualifiers (D1–D10), quality signals (Q1–Q8), genericity signals (G1–G4), voice consistency, confidence, and final calculation. Outputs a score/10, verdict (pass/weak/fail), and a PRESCRIPTION block with 3 concrete fixes. Scoring results cached in queue.json.
 
-**9. Claude Rewrite** *(optional)* — Anthropic Claude Sonnet for editorial polish. Factual content and sourced claims are never altered.
+**9. API Rewrite** *(optional)* — editorial polish via external API. Supported providers: Claude Sonnet (Anthropic), Gemini 2.0 Flash (Google, free tier), Groq llama-3.3-70b (free tier), DeepSeek V3, or local Ollama. Factual content and sourced claims are never altered. Note: `claude_rewrite.py` uses a simplified persona retrieval path separate from the main pipeline persona system.
 
 ---
 
@@ -100,6 +100,8 @@ Google News    Reranker                           27b/122b   (think=True)
 | Web Crawler | Crawl4AI (FastAPI + Chromium) | Ubuntu |
 | Fallback Fetch | Playwright service | Ubuntu |
 | Cache | Valkey (Redis-compatible) | Ubuntu |
+
+Valkey caches raw fetch results (full-text HTML per URL). Cache hit rate ~30–50% on re-runs of the same topic. Avoids re-crawling the same URLs across multiple research passes.
 | CMS | PayloadCMS 3.x + MongoDB | Ubuntu |
 | Frontend | Next.js 15 + Tailwind CSS v4 | Ubuntu (PM2/nginx) |
 
@@ -136,7 +138,7 @@ MoE models (35b-a3b, 122b) use `think=False` — enabling thinking on long promp
 | entertainment_review | Film, series, or book review | medium |
 | default | Generic fallback | medium |
 
-Schema selection is the strongest quality lever after research quality. The same topic with games_analysis vs games_early_access schema can produce an 8.0 PASS vs a 5.3 FAIL — because the schema determines what the closing paragraph is allowed to argue.
+Schema selection is the strongest quality lever after research quality. The same topic with `games_analysis` vs `games_early_access` can produce an 8.0 PASS vs a 5.3 FAIL — because the schema determines what the closing paragraph is allowed to argue.
 
 ---
 
@@ -173,22 +175,14 @@ knowledge_evergreen
 ### Extract Flow
 
 ```
-research_games (525 chunks, 31 URLs)
+research_{category} (temporary chunks)
   │
-  ├── [auto-clean]  garbage removed (~150 chunks)
-  │
-  ├── [extract]  qwen3.6:27b reads each URL
-  │     ├── URL 1: analogstickgaming.com  → 4 facts extracted
-  │     ├── URL 2: thegamer.com           → 5 facts extracted
-  │     ├── URL 3: quora.com              → BLOCKED before fetch
-  │     └── ...
-  │
-  ├── [human review]  keep / delete / edit per fact
-  │
-  ├── [deduplicate]  cross-URL duplicate removal
-  │
-  └── knowledge_games: 6 clean chunks  ←  permanent
-      research_games: wiped
+  ├── [auto-clean]   garbage removed (consent walls, nav dumps, affiliate copy)
+  ├── [extract]      qwen3.6:27b reads each URL, distills 3-6 fact paragraphs
+  ├── [human review] keep / delete / edit per fact
+  ├── [deduplicate]  cross-encoder threshold 0.85
+  └── knowledge_{category}: clean chunks, permanent
+      research_{category}: wiped
 ```
 
 ---
@@ -197,49 +191,45 @@ research_games (525 chunks, 31 URLs)
 
 This is the part most people will get wrong, skip, and then wonder why the output sounds like ChatGPT.
 
-The persona system does not work from a system prompt or a description of how you write. It works from a Qdrant collection of chunks extracted from your actual writing — stored as 4096-dimensional vectors, retrieved at generation time, placed at the end of the prompt for recency bias. The model reads what you actually wrote, not what you think you write like.
-
-**There is no persona builder yet.** The Persona Builder is listed under "In Development." Until it ships, you build the collection manually: write chunks in a text file, embed them via the Knowledge menu, push them into a `persona_{name}` collection in Qdrant. Tedious. Worth it.
+The persona system does not work from a system prompt or a description of how you write. It works from a Qdrant collection of chunks extracted from your actual writing — stored as 4096-dimensional vectors with separate trigger vectors, retrieved at generation time based on relevance to the article focus, and placed at the end of the prompt for recency bias. The model reads what you actually wrote, not what you think you write like.
 
 Without a persona collection the pipeline still works — it generates competent, neutral editorial prose. It will pass scoring on argument and research quality. But voice-dependent quality signals (Q4–Q7) will be consistently absent, and the output will read like the model, not like you.
 
+### Dimensions
+
+Each persona collection is structured around 7 rhetorical dimensions — distinct aspects of how you think and write:
+
+| Dimension | What it captures |
+|-----------|-----------------|
+| argument | Questioning the dominant framing — both sides have part of the truth |
+| critique | Exposing the mechanism by which a system fails or protects itself |
+| skepticism | Claim exceeds evidence — hype, benchmarks, demos vs reality |
+| reference | An older work or pattern describes exactly what is happening now |
+| appreciation | Something overlooked deserves recognition — niche wins, underdogs |
+| humor | Comic register as the right analytical tool — wit, irony, absurdism |
+| personal | Speaking from direct experience, not from analytical distance |
+
+Each chunk carries a **trigger** — a short "when X" phrase that describes the situation that activates this rhetorical move. At generation time, triggers are compared against the article focus vector to select the most contextually relevant chunks. Pure relevance ranking with a similarity threshold (0.25) — chunks that don't match the article's angle are excluded regardless of their general quality.
+
+Empirical finding: 2 precise chunks above threshold consistently outperform 7 imprecise chunks below it.
+
 ### What a Persona Chunk Looks Like
 
-The collection is structured around dimensions — distinct aspects of how you think and write. Each dimension should have 3–6 chunks. The system samples one chunk per dimension at generation time for coverage, not similarity.
-
 ```
-dimension: criticism_style
-"I don't trust reviews that don't name what they expected and explain why
- the thing failed to deliver it. Disappointment without a benchmark is just
- a mood. Tell me what you thought you were getting and I'll tell you if your
- disappointment is earned."
-
-dimension: hype_reaction
-"The demo was impressive. So was every demo from this studio for the last
- eight years. Three of those games shipped broken and were patched into
- adequacy six months later. I'll be impressed when I'm playing the retail
- build, not before."
-
-dimension: technical_depth
-"When a company says 'proprietary AI upscaling' without naming the technique,
- they mean they licensed something or built something they don't want compared
- directly to DLSS or FSR. The vagueness is the signal."
+dimension: skepticism
+trigger: when product demos substitute for product reality
+text: "The demo was impressive. So was every demo from this studio for the
+last eight years. Three of those games shipped broken and were patched into
+adequacy six months later. I'll be impressed when I'm playing the retail
+build, not before."
 
 dimension: humor
-"The press release used the word 'revolutionary' four times and 'innovative'
- three times. The feature being described is a minimap."
-
-dimension: worldview
-"Most industries reward the appearance of progress. Gaming press rewards
- the appearance of enthusiasm. The overlap is large enough to park a stadium in."
-
-dimension: argumentation
-"The counterargument is always worth steelmanning before you dismiss it.
- If you can't make the opposing case stronger than its proponents do, you
- haven't understood it well enough to disagree with it."
+trigger: when the critique requires the thing being critiqued
+text: "The press release used the word 'revolutionary' four times and
+'innovative' three times. The feature being described is a minimap."
 ```
 
-These are illustrative examples. Your chunks should come from things you have actually written — blog posts, forum arguments, reviews, notes, anything where your real voice is on record. The model will find the register. Your job is to give it enough material to find.
+These are illustrative examples. Your chunks should come from things you have actually written — blog posts, forum arguments, reviews, notes, anything where your real voice is on record.
 
 ### Persona Collection Structure
 
@@ -248,13 +238,42 @@ Each chunk in Qdrant carries:
 ```json
 {
   "text": "...",
-  "dimension": "criticism_style",
-  "source": "manual",
-  "author": "your_name"
+  "dimension": "skepticism",
+  "trigger": "when product demos substitute for product reality",
+  "intensity": "high",
+  "topic": "game-previews",
+  "source": "conversation",
+  "text_hash": "...",
+  "trigger_dense_vector": [...]
 }
 ```
 
-Minimum viable persona: 6 dimensions, 3 chunks each = 18 chunks. The reference implementation (`persona_lukasz`) has 11 dimensions and 53 chunks, built over several sessions from actual published writing.
+Minimum viable persona: 7 dimensions, 2–3 chunks each = 14–21 chunks. The reference implementation (`persona_lukasz`) has 53 chunks across all 7 dimensions.
+
+### Persona Builder
+
+The Persona Builder (`menus/knowledge/persona_builder.py`) is a terminal tool for creating and managing persona collections. It connects to local Ollama for AI-assisted chunk extraction.
+
+**Two modes:**
+
+- **Paste** — paste any text (any language), the model condenses it into a persona chunk with correct fields
+- **Converse** — the model asks you a targeted question for the weakest dimension, you answer, it extracts a chunk
+
+**Available commands inside the builder:**
+
+| Command | Action |
+|---------|--------|
+| [1] Paste | Analyze pasted text |
+| [2] Converse | AI asks targeted question |
+| [S] Sync | Push draft chunks to Qdrant |
+| [N] New | Create new persona collection |
+| [M] Model | Change Ollama model |
+| [V] View | Browse draft chunks |
+| [C] Clear | Clear draft |
+
+After generation, each proposed chunk goes through a negotiation loop where you can edit the text (opens in Notepad), change the dimension, adjust the trigger, or discard.
+
+Access via: `Knowledge > Feed > [P] > select persona > [3] Persona Builder`
 
 ---
 
@@ -278,7 +297,7 @@ Qdrant stores all research, knowledge, and persona context as 4096-dimensional v
 research_{category}     ← per-item research, temporary (~50–300 chunks)
 knowledge_{category}    ← curated extracted facts, permanent, human-reviewed
 knowledge_evergreen     ← cross-category permanent context
-persona_{name}          ← author voice, opinions, and style chunks
+persona_{name}          ← author voice chunks with trigger vectors
 ```
 
 **Retrieval per generation:**
@@ -288,7 +307,7 @@ generate(category=games, slug=replaced)
   → research_games        (scroll all + BM25 pre-rank → top 100, filter: item_id)
   → knowledge_games       (hybrid HNSW+sparse, top_k=7,  filter: topic_slug)
   → knowledge_evergreen   (hybrid HNSW+sparse, top_k=5,  filter: category)
-  → persona_lukasz        (dense coverage sampling, 1 chunk per dimension)
+  → persona_lukasz        (scroll all + trigger_sim ranking, threshold 0.25, bypasses reranker)
   → semantic dedup        (cosine sim threshold 0.92, research chunks only)
   → reranker              (cross-encode pool → top 35)
   → _build_prompt()       (top 20 after persona allocation)
@@ -303,14 +322,15 @@ Hybrid retrieval fuses dense semantic vectors with sparse BM25 keyword vectors v
 `_build_prompt()` in `pipeline/generate_run.py` separates context into distinct semantic blocks with a specific order chosen for recency bias — the LLM attends most strongly to content closest to the generation task:
 
 ```
-=== YOUR PERSONA ===        ← identity, worldview (only if .md persona file exists)
-=== BACKGROUND KNOWLEDGE === ← evergreen concepts, weaved in only where relevant
-=== RESEARCH FACTS ===      ← RAG chunks from research + knowledge collections
-=== AUTHOR VOICE ===        ← RAG chunks from persona_{name} (recency bias position)
-=== ARTICLE DIRECTION ===   ← mandatory focus angle
-=== ARTICLE STRUCTURE ===   ← schema sections, opening/closing rules, voice rule
+=== BACKGROUND KNOWLEDGE === <- evergreen concepts, weaved in only where relevant
+=== RESEARCH FACTS ===       <- RAG chunks from research + knowledge collections
+=== AUTHOR VOICE ===         <- persona chunks, NOT reranked, placed last for recency bias
+=== ARTICLE DIRECTION ===    <- mandatory focus angle
+=== ARTICLE STRUCTURE ===    <- schema sections, opening/closing rules, voice rule
 TASK: write the article
 ```
+
+Persona chunks bypass the reranker. Research and knowledge chunks are cross-encoded against the query; persona chunks are ranked by trigger similarity only and injected after reranking. This keeps voice context from competing with factual context in the reranker scoring.
 
 **Hard constraints enforced in prompt:**
 - Never invent benchmark numbers, version strings, or release dates not present in context
@@ -397,26 +417,27 @@ Scoring results (score, verdict) cached in `queue.json` and displayed in queue l
 - [x] BAAI/bge-reranker-v2-m3 neural reranking
 - [x] Permanent knowledge base with LLM extraction + human review
 - [x] Knowledge retrieval by `topic_slug` and `category` at generation time
-- [x] Persona injection via RAG (separate from research context, recency bias position)
+- [x] Persona injection via RAG (trigger-vector ranked, threshold filtered, recency bias position)
+- [x] Persona Builder — AI-assisted chunk creation with Paste and Converse modes
 - [x] Focus angle enforcement — model cannot override
 - [x] Blocked domain filter at fetch time, discovery time, and auto-clean
 - [x] Single-source domain config (trusted + blocked JSON files, 328 + 44 entries)
 - [x] Section-aware chunking with heading boundary detection
 - [x] Live slug autocomplete in queue
-- [x] Claude Sonnet rewrite stage (optional)
+- [x] API rewrite stage — Claude, Gemini, Groq, DeepSeek, local Ollama (optional)
 - [x] Focus Picker — 20 LLM angles, human selects before generation
 - [x] Focus Validator — BM25 + LLM check before generation
 - [x] Schema Suggester — BM25 + LLM selects from 12 article schemas
 - [x] Scoring Pass — 8-phase quality scoring with prescription
 - [x] Auto-garbage detection before knowledge review
-- [x] Night run — autonomous batch pipeline
+- [x] Night run — autonomous batch pipeline (`night_run.py`: runs discovery, research, focus picker, generate, and score for all queued items unattended; results reviewed next morning)
+- [x] Clip — paste URL or text directly into queue for fast manual research seeding (`menus/clip.py`)
 
 ## In Development
 
-- [ ] Persona Builder — extract author voice from own writing samples into Qdrant
-- [ ] `_finalize_item()` — unified discovery flow
+- [ ] Scorer gradation — finer resolution above the pass threshold
+- [ ] Uber Research — iterative deep research with coverage scoring
 - [ ] SearXNG engine tuning — deeper pagination, more sources
-- [ ] Uber Research — iterative research with coverage scoring
 
 ---
 
@@ -432,13 +453,12 @@ Scoring results (score, verdict) cached in `queue.json` and displayed in queue l
 | RAG top_k after reranking | 35 chunks |
 | Prompt context (top chunks) | ~20 chunks |
 | Embedding dimensions | 4096 |
-| Valkey cache hit rate | ~30–50% on re-runs |
 
 ---
 
 ## Setup
 
-Two machines minimum. One won't work well — not because it's impossible, but because the architecture assumes the embedding server, Qdrant, reranker, SearXNG, and Crawl4AI are always available over the network without competing for GPU memory with the main LLM. If you run everything on one machine, expect to fight VRAM pressure constantly.
+Two machines is the practical minimum. Running everything on one machine is possible but expect constant VRAM pressure — the embedding server, Qdrant, reranker, SearXNG, and Crawl4AI need to be available 24/7 without competing for GPU memory with the main LLM.
 
 **Machine 1 — Windows (LLM inference):**
 - NVIDIA GPU with 24GB+ VRAM. RTX 3090 runs 27b models. RTX 4090/5090 runs 122b at acceptable speed.
@@ -463,44 +483,36 @@ All service endpoints are configured via `.env` in the project root. Copy `.env.
 ```ini
 # Ollama (Machine 1 — local)
 OLLAMA_URL=http://127.0.0.1:11434
-OLLAMA_MODEL_NORMAL=qwen3.6:27b
-OLLAMA_MODEL_HEAVY=qwen3.5:122b
-OLLAMA_MODEL_LIGHT=qwen3.5:4b
 
 # Embeddings (Machine 2)
-EMBED_URL=http://10.0.0.195:11434
+EMBED_URL=http://YOUR_MACHINE2_IP:11434
 EMBED_MODEL=qwen3-embedding:8b-q8_0
 
 # Qdrant (Machine 2)
-QDRANT_URL=http://10.0.0.195:6333
+QDRANT_URL=http://YOUR_MACHINE2_IP:6333
 
 # Reranker (Machine 2)
-RERANKER_URL=http://10.0.0.195:8766
+RERANKER_URL=http://YOUR_MACHINE2_IP:8766
 
 # Crawl4AI (Machine 2)
-CRAWL4AI_URL=http://10.0.0.195:8777
+CRAWL4AI_URL=http://YOUR_MACHINE2_IP:8777
 
 # SearXNG (Machine 2)
-SEARXNG_URL=http://10.0.0.195:8080
+SEARXNG_URL=http://YOUR_MACHINE2_IP:8080
 
 # Valkey / Redis (Machine 2)
-VALKEY_HOST=10.0.0.195
+VALKEY_HOST=YOUR_MACHINE2_IP
 VALKEY_PORT=6379
-
-# Paths (Windows)
-BASE_DIR=C:\NonSequitur
-OUTPUT_DIR=C:\NonSequitur\output
-LOG_DIR=C:\NonSequitur\logs
 ```
 
-Domain trust and block lists are in `data/domains_trusted.json` and `data/domains_blocked.json`. Persona collection in Qdrant — see Persona System section above.
+Domain trust and block lists are in `data/domains_trusted.json` and `data/domains_blocked.json`. Persona collection lives in Qdrant — see Persona System section above.
 
-**What you need to build yourself before first run:**
-- Your `persona_{name}` Qdrant collection (see Persona System above — no shortcut here)
+**What you need to build before first run:**
+- Your `persona_{name}` Qdrant collection (see Persona System above — the Persona Builder handles this, but you need to provide the source material)
 - SearXNG configured with your preferred engines (back up `settings.yml` before any changes)
-- `config.py` pointed at your Machine 2 IP addresses
+- `.env` pointed at your Machine 2 IP addresses
 
-There is no step-by-step installation guide. The codebase assumes you can read it.
+There is no automated installer. The expected path is: read the code, adapt the config, run it.
 
 ---
 
@@ -508,35 +520,7 @@ There is no step-by-step installation guide. The codebase assumes you can read i
 
 NonSequitur covers topics the mainstream gaming and tech press ignores, undercovers, or sanitizes — contrarian angles, honest criticism, analysis without PR appeasement. Quality is measured by argument depth and coverage utility, not trending score or press ratio.
 
-The platform writes what IGN, PC Gamer, and VentureBeat won't — because they optimise for a different audience, different advertisers, and different incentives. Every article is anchored to a thesis the author chose and the model cannot override. The pipeline automates the labour. The editorial direction remains human.
-
----
-
-## Screenshots
-
-### Main Menu
-![Main menu](docs/splash_main_menu.png)
-
-### Discovery
-![Discovery](docs/discovery.png)
-
-### Queue
-![Queue](docs/queue.png)
-
-### Research
-![Research](docs/research.png)
-
-### Knowledge Base
-![Knowledge menu](docs/knowledge_menu.png)
-
-### Extract — LLM Fact Review
-![Extract](docs/extract.png)
-
-### Focus Picker
-![Focus picker](docs/focus_picker.png)
-
-### Generate
-![Generate](docs/generate.png)
+Every article is anchored to a thesis the author chose and the model cannot override. The pipeline automates the labour. The editorial direction remains human.
 
 ---
 
@@ -547,4 +531,4 @@ The platform writes what IGN, PC Gamer, and VentureBeat won't — because they o
 
 ---
 
-*Built entirely on self-hosted infrastructure. No cloud LLMs in the core pipeline. No subscriptions. No data leaving the local network except for the optional Claude rewrite stage.*
+*Built entirely on self-hosted infrastructure. No cloud LLMs in the core pipeline. No subscriptions. No data leaving the local network except for the optional API rewrite stage.*
