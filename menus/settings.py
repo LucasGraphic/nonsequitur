@@ -46,7 +46,7 @@ def _active_persona_menu() -> None:
     try:
         with open(config_path, "rb") as f:
             cfg = f.read().replace(b"\r\n", b"\n").replace(b"\r", b"\n").decode("utf-8")
-        cfg = _re.sub('PERSONA_COLLECTION\s*=\s*["\']+.*?["\']+', 'PERSONA_COLLECTION = "' + new_col + '"', cfg)
+        cfg = _re.sub(r'PERSONA_COLLECTION\s*=\s*["\']+.*?["\']+', 'PERSONA_COLLECTION = "' + new_col + '"', cfg)
         with open(config_path, "wb") as f:
             f.write(cfg.replace("\n", "\r\n").encode("utf-8"))
         print(f"  [OK] Active persona -> {new_col}")
