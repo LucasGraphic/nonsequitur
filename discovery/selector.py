@@ -200,38 +200,76 @@ def ask_persona_and_model(default_persona: str = "lukasz",
     personas_dir = os.path.join(base_dir, "data", "personas")
 
     # -- Count chunks per persona from Qdrant -----------------------------
-    def _persona_chunk_count(persona_name: str) -> int:
+    def _persona_chunk_count(collection_name: str) -> int:
         try:
-            from config import QDRANT_URL, PERSONA_COLLECTION
+            from config import QDRANT_URL
             import requests as _req
-            if persona_name != "lukasz":
-                return 0
-            count_url = f"{QDRANT_URL}/collections/{PERSONA_COLLECTION}/points/count"
+            count_url = f"{QDRANT_URL}/collections/{collection_name}/points/count"
             rc = _req.post(count_url, json={"exact": True}, timeout=4)
             rc.raise_for_status()
             return rc.json().get("result", {}).get("count", 0)
         except Exception:
             return -1
 
+    # -- Build persona list dynamically from Qdrant persona_* collections --
+    def _fetch_persona_collections() -> list:
+        """Return list of (name, collection_name) for all persona_* in Qdrant."""
+        try:
+            from config import QDRANT_URL
+            import requests as _req
+            r = _req.get(f"{QDRANT_URL}/collections", timeout=4)
+            r.raise_for_status()
+            cols = [c["name"] for c in r.json().get("result", {}).get("collections", [])]
+            personas = []
+            for col in sorted(cols):
+                if col.startswith("persona_"):
+                    name = col[len("persona_"):]
+                    personas.append((name, col))
+            return personas
+        except Exception:
+            return []
+
+    # Resolve default_persona from PERSONA_COLLECTION if not passed explicitly
+    _active_collection = ""
+    try:
+        from config import PERSONA_COLLECTION as _PC
+        _active_collection = _PC  # e.g. "persona_lukasz"
+        if not default_persona or default_persona == "lukasz":
+            if _PC.startswith("persona_"):
+                default_persona = _PC[len("persona_"):]
+    except Exception:
+        pass
+
+    _qdrant_personas = _fetch_persona_collections()
+
+    if _qdrant_personas:
+        persona_list = _qdrant_personas  # list of (name, collection_name)
+        _source = "qdrant"
+    else:
+        # Fallback: config.PERSONAS
+        persona_list = [(name, f"persona_{name}") for name in PERSONAS]
+        _source = "config"
+
     print()
     print("  -- Persona --------------------------------------------------")
-    persona_list = list(PERSONAS.items())
-    for idx, (name, info) in enumerate(persona_list, 1):
+    for idx, (name, col) in enumerate(persona_list, 1):
         marker = " <-" if name == default_persona else ""
-        count  = _persona_chunk_count(name)
+        count  = _persona_chunk_count(col)
         if count == -1:
             status = "  [qdrant unavailable]"
         elif count == 0:
             status = "  [no chunks yet]"
         else:
             status = f"  ({count} chunks)"
-        print(f"  [{idx}] {name:<12} -- {info['label']}{marker}{status}")
+        # Label: use config.PERSONAS if available, else just name
+        label = PERSONAS.get(name, {}).get("label", name)
+        print(f"  [{idx}] {name:<12} -- {label}{marker}{status}")
 
     raw = input(f"  Choose persona (Enter = {default_persona}): ").strip()
     persona_name = default_persona
     if raw.isdigit() and 1 <= int(raw) <= len(persona_list):
         persona_name = persona_list[int(raw) - 1][0]
-    elif raw and raw in PERSONAS:
+    elif raw and any(n == raw for n, _ in persona_list):
         persona_name = raw
 
     # -- Model selection -- live from Ollama ----------------------------
