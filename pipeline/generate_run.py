@@ -16,6 +16,7 @@ from datetime import datetime
 
 import core.queue as queue
 from pipeline.content_filter import is_garbage as _rag_is_garbage
+from pipeline.suitability_gate import check_research_quality, print_gate_result, gate_prompt_interactive
 from config import (
     OLLAMA_URL, OLLAMA_EMBED_URL, OUTPUT_DIR, QDRANT_URL,
     EMBED_MODEL, PERSONAS_DIR, PERSONAS, DEFAULT_PERSONA,
@@ -382,7 +383,7 @@ def _retrieve_context(topic: str, item_id: str, category: str,
         # Called once after sub_queries loop -- not per query.
         # trigger_dense vector embedded at insert time -- no extra embed call here.
         from config import PERSONA_COLLECTION
-        _item_persona = (item.get('persona') or '').strip()
+        _item_persona = (persona or '').strip()
         if _item_persona:
             _persona_col = 'persona_' + _item_persona
         else:
@@ -1658,40 +1659,40 @@ def run_generate(item_ids: list = None, api_provider: str = "", night_run: bool 
         )
         print(f"   -> Context: {len(context_persona)} persona (prompt cap:6000) + {len(context_research)} research chars  |  Sources: {len(sources)}")
 
-        # -- Research quality gate -----------------------------------------
-        _rq_chars   = len(context_research)
-        _rq_sources = len(sources)
-        _rq_press   = sum(1 for c in (chunk_meta or []) if c.get("trust", "unknown") in ("press", "trusted") and c.get("src") != "persona")
-        _rq_issues  = []
+        # -- Suitability gate (S32) ----------------------------------------
+        try:
+            from config import GATE_MIN_CHUNKS, GATE_MIN_AVG_SCORE, GATE_MIN_SOURCES
+        except ImportError:
+            GATE_MIN_CHUNKS, GATE_MIN_AVG_SCORE, GATE_MIN_SOURCES = 5, 0.25, 2
 
-        if _rq_chars == 0:
-            _rq_issues.append("CRITICAL: zero research context -- article will hallucinate")
-        elif _rq_chars < 3000:
-            _rq_issues.append(f"THIN: only {_rq_chars} chars of research (recommend 8000+)")
-        elif _rq_chars < 6000:
-            _rq_issues.append(f"SPARSE: {_rq_chars} chars of research (recommend 6000+)")
+        _gate_passed, _gate_verdict, _gate_reason, _gate_stats = check_research_quality(
+            chunk_meta       = chunk_meta,
+            context_research = context_research,
+            min_chunks       = GATE_MIN_CHUNKS,
+            min_avg_score    = GATE_MIN_AVG_SCORE,
+            min_sources      = GATE_MIN_SOURCES,
+        )
+        print_gate_result(_gate_passed, _gate_verdict, _gate_reason, _gate_stats)
+        queue.update_field(item_id, "gate_stats", _gate_stats)
 
-        if _rq_sources < 2:
-            _rq_issues.append(f"LOW SOURCES: only {_rq_sources} unique domain(s)")
-
-        if _rq_press < 3:
-            _rq_issues.append(f"LOW TRUST: only {_rq_press} press/trusted chunks in context")
-
-        if _rq_issues:
-            print(f"   [research-gate] ⚠ Research quality issues:")
-            for _issue in _rq_issues:
-                print(f"     - {_issue}")
-            if not item.get("night_run", False):
-                _gate_ans = input("   Continue anyway? [Y/n]: ").strip().lower()
-                if _gate_ans == "n":
-                    print("   Skipped -- re-run research first.")
+        if not _gate_passed:
+            if item.get("night_run", False):
+                # Night run: mark and skip -- do not generate
+                print(f"   [gate] Night run: skipping topic (insufficient research).")
+                queue.update_field(item_id, "gate_verdict", _gate_verdict)
+                queue.update_status(item_id, queue.STATUS_RESEARCHED)
+                continue
+            else:
+                _gate_choice = gate_prompt_interactive(_gate_verdict, _gate_reason)
+                if _gate_choice == "skip":
+                    print("   [gate] Skipped -- re-run research first.")
                     queue.update_status(item_id, queue.STATUS_RESEARCHED)
                     continue
-            else:
-                print("   [research-gate] Night run -- continuing despite thin research.")
-        else:
-            _rq_label = "GOOD" if _rq_chars >= 8000 else "OK"
-            print(f"   [research-gate] {_rq_label} ({_rq_chars} chars, {_rq_press} press/trusted, {_rq_sources} sources)")
+                elif _gate_choice == "delete":
+                    print("   [gate] Deleted from queue.")
+                    queue.remove(item_id)
+                    continue
+                # else "continue" -- user accepted risk, proceed
 
         upgrade_url  = item.get("upgrade_url", "")
         upgrade_mode = item.get("upgrade_mode", "")

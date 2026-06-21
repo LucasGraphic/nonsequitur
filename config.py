@@ -239,11 +239,17 @@ LLM_TEMPERATURE_BY_MODEL = {
 RAG_SCORE_MIN = 0.25  # unused -- _min_score filter removed, reranker handles quality
 
 # -- Persona RAG settings ---------------------------------------------------
-PERSONA_COLLECTION = "persona_schopenhauer"  # single unified collection (session 17+)
+PERSONA_COLLECTION = "persona_lukasz"  # single unified collection (session 17+)
 PERSONA_THRESHOLD  = 0.25  # min trigger_sim to include persona chunk
 PERSONA_MAX        = 7     # max persona chunks -- one per dimension (8 dimensions)
 PERSONA_MIN        = 2     # guaranteed minimum regardless of score
 PERSONA_TRIGGER_W  = 1.0   # pure trigger match -- chunk_score excluded from persona selection
+
+# --- Suitability gate (S32) ---
+GATE_MIN_CHUNKS    = 5      # minimum research chunks before generate
+GATE_MIN_AVG_SCORE = 0.25   # minimum avg reranker score (ignored if reranker offline)
+GATE_MIN_SOURCES   = 2      # minimum unique source domains (soft, contributes to THIN)
+
 
 PERSONA_DIMENSIONS = {
     # 7 dimensions -- each maps to a distinct rhetorical move.
