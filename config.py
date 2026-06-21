@@ -250,6 +250,12 @@ GATE_MIN_CHUNKS    = 5      # minimum research chunks before generate
 GATE_MIN_AVG_SCORE = 0.25   # minimum avg reranker score (ignored if reranker offline)
 GATE_MIN_SOURCES   = 2      # minimum unique source domains (soft, contributes to THIN)
 
+# --- Uber Research (S32) ---
+UBER_RESEARCH_MODEL    = "qwen3.6:27b"   # model for gap analysis
+UBER_GAP_QUESTIONS     = 4               # number of gap questions to generate
+UBER_MAX_URLS_PER_Q    = 8               # max URLs to fetch per question
+
+
 
 PERSONA_DIMENSIONS = {
     # 7 dimensions -- each maps to a distinct rhetorical move.

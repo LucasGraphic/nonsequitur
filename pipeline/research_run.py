@@ -1235,6 +1235,91 @@ def run_research(item_ids: list = None) -> int:
         queue.update_status(item_id, queue.STATUS_RESEARCHED)
         print(f"   [>>] ?? Status ->?? researched")
 
+        # -- Uber Research gate (S32) --------------------------------------
+        # Run suitability gate on freshly indexed chunks.
+        # If THIN: offer Uber Research (interactive) or auto-run (night_run).
+        try:
+            from pipeline.suitability_gate import check_research_quality, print_gate_result
+            from config import (
+                QDRANT_URL as _UB_QDRANT, GATE_MIN_CHUNKS, GATE_MIN_AVG_SCORE,
+                GATE_MIN_SOURCES, UBER_RESEARCH_MODEL, UBER_GAP_QUESTIONS, UBER_MAX_URLS_PER_Q,
+                OLLAMA_URL as _UB_OLLAMA,
+            )
+            # Quick chunk count for gate (no reranker scores yet -- score gate relaxed)
+            _ub_count_r = requests.post(
+                f"{_UB_QDRANT}/collections/{col_name}/points/count",
+                json    = {"exact": False,
+                           "filter": {"must": [{"key": "item_id", "match": {"value": item_id}}]}},
+                timeout = 5,
+            )
+            _ub_count = _ub_count_r.json().get("result", {}).get("count", 0)
+            # Build minimal chunk_meta from count only (no reranker here)
+            _ub_meta  = [{"src": "research", "score": 0.0, "domain": "unknown"}] * _ub_count
+
+            _ub_passed, _ub_verdict, _ub_reason, _ub_stats = check_research_quality(
+                chunk_meta       = _ub_meta,
+                context_research = "",
+                min_chunks       = GATE_MIN_CHUNKS,
+                min_avg_score    = 0.0,   # no reranker scores at research time
+                min_sources      = GATE_MIN_SOURCES,
+            )
+
+            if not _ub_passed:
+                print_gate_result(_ub_passed, _ub_verdict, _ub_reason, _ub_stats)
+                _run_uber = False
+
+                _is_night = item.get("night_run", False)
+                if _is_night:
+                    print("   [uber] Night run -- auto-running Uber Research on thin topic.")
+                    _run_uber = True
+                else:
+                    print()
+                    _ub_ans = input("   [gate] Research thin. Run Uber Research? [Y/n]: ").strip().lower()
+                    if _ub_ans != "n":
+                        _run_uber = True
+                    else:
+                        print("   [gate] Skipping Uber Research -- topic may produce weak article.")
+
+                if _run_uber:
+                    from pipeline.uber_research import run_uber_research
+                    _ub_stats_after = run_uber_research(
+                        item         = item,
+                        col_name     = col_name,
+                        client       = client,
+                        ollama_url   = _UB_OLLAMA,
+                        model        = UBER_RESEARCH_MODEL,
+                        is_night_run = _is_night,
+                        n_questions  = UBER_GAP_QUESTIONS,
+                        max_urls_per_q = UBER_MAX_URLS_PER_Q,
+                    )
+                    queue.update_field(item_id, "uber_research", _ub_stats_after)
+                    # Re-check gate after uber
+                    _ub2_count = _ub_stats_after.get("total_after", 0)
+                    _ub2_meta  = [{"src": "research", "score": 0.0, "domain": "unknown"}] * _ub2_count
+                    _ub2_passed, _ub2_verdict, _ub2_reason, _ = check_research_quality(
+                        chunk_meta   = _ub2_meta,
+                        min_chunks   = GATE_MIN_CHUNKS,
+                        min_avg_score = 0.0,
+                        min_sources  = GATE_MIN_SOURCES,
+                    )
+                    if not _ub2_passed:
+                        print(f"   [uber] Still thin after Uber Research ({_ub2_verdict}).")
+                        if _is_night:
+                            queue.update_field(item_id, "uber_verdict", "still_thin")
+                            print("   [uber] Night run: leaving in queue for manual review.")
+                        else:
+                            _ub3_ans = input("   [uber] Still thin. Continue anyway? [Y/n]: ").strip().lower()
+                            if _ub3_ans == "n":
+                                print("   [uber] Skipping -- re-research manually.")
+                                continue
+                    else:
+                        print(f"   [uber] Gate passed after Uber Research ({_ub2_stats_after.get('new_chunks',0)} new chunks).")
+            else:
+                print_gate_result(_ub_passed, _ub_verdict, _ub_reason, _ub_stats)
+        except Exception as _ub_err:
+            print(f"   [uber] Gate/Uber error: {_ub_err} -- continuing.")
+        # -- end Uber Research gate ----------------------------------------
+
         # Auto-clean garbage chunks immediately after research
         try:
             from menus.knowledge.review import _auto_clean as _do_clean

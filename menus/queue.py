@@ -659,6 +659,7 @@ def _inspect_edit_item(item: dict) -> None:
             if current_status == queue.STATUS_DONE:
                 print(f"  [1] Reset -> researched (regenerate article, keep research data)")
                 print(f"  [2] Reset -> pending (full re-run: research + generate)")
+                print(f"  [3] Uber Research (gap analysis + targeted search, then regenerate)")
                 raw_r = input("  Choice (Enter = cancel): ").strip()
                 if raw_r == "1":
                     _reset_to_researched(item)
@@ -668,6 +669,41 @@ def _inspect_edit_item(item: dict) -> None:
                     gen_now = input("  Generate now? [Y/n]: ").strip().lower()
                     if gen_now in ("", "y", "yes"):
                         _run_generate(item)
+                    continue
+                elif raw_r == "3":
+                    try:
+                        from qdrant_client import QdrantClient as _UbQC
+                        from config import (
+                            QDRANT_URL as _UbQURL, OLLAMA_URL as _UbOLLAMA,
+                            UBER_RESEARCH_MODEL, UBER_GAP_QUESTIONS, UBER_MAX_URLS_PER_Q,
+                            research_collection as _UbRC,
+                        )
+                        from pipeline.uber_research import run_uber_research
+                        _ub_client = _UbQC(url=_UbQURL)
+                        _ub_col    = _UbRC(item.get("category", "other"))
+                        print(f"  Running Uber Research on: {item['topic'][:60]}")
+                        _ub_result = run_uber_research(
+                            item           = item,
+                            col_name       = _ub_col,
+                            client         = _ub_client,
+                            ollama_url     = _UbOLLAMA,
+                            model          = UBER_RESEARCH_MODEL,
+                            is_night_run   = False,
+                            n_questions    = UBER_GAP_QUESTIONS,
+                            max_urls_per_q = UBER_MAX_URLS_PER_Q,
+                        )
+                        import core.queue as _ubq
+                        _ubq.update_field(item["id"], "uber_research", _ub_result)
+                        print(f"  [OK] New chunks: {_ub_result.get('new_chunks', 0)}  |  Total: {_ub_result.get('total_after', 0)}")
+                        _reset_to_researched(item)
+                        _rf = input("  Reset focus? [Y/n]: ").strip().lower()
+                        if _rf in ("", "y", "yes"):
+                            _clear_focus(item)
+                        gen_now = input("  Generate now? [Y/n]: ").strip().lower()
+                        if gen_now in ("", "y", "yes"):
+                            _run_generate(item)
+                    except Exception as _ub_err:
+                        print(f"  Uber Research error: {_ub_err}")
                     continue
                 elif raw_r == "2":
                     pass  # fall through to full reset below
@@ -1370,6 +1406,7 @@ def _queue_menu() -> None:
                 if status == queue.STATUS_DONE:
                     print(f"  [1] Regenerate only (keep research)")
                     print(f"  [2] Full re-run (new research + generate)")
+                    print(f"  [3] Uber Research (gap analysis + targeted search, then regenerate)")
                     ch = input("  > ").strip()
                     if ch == "1":
                         _reset_to_researched(item)
@@ -1379,6 +1416,40 @@ def _queue_menu() -> None:
                         gen = input("  Generate now? [Y/n]: ").strip().lower()
                         if gen in ("", "y", "yes"):
                             _run_generate(item)
+                    elif ch == "3":
+                        try:
+                            from qdrant_client import QdrantClient as _UbQC
+                            from config import (
+                                QDRANT_URL as _UbQURL, OLLAMA_URL as _UbOLLAMA,
+                                UBER_RESEARCH_MODEL, UBER_GAP_QUESTIONS, UBER_MAX_URLS_PER_Q,
+                                research_collection as _UbRC,
+                            )
+                            from pipeline.uber_research import run_uber_research
+                            _ub_client = _UbQC(url=_UbQURL)
+                            _ub_col    = _UbRC(item.get("category", "other"))
+                            print(f"  Running Uber Research on: {item['topic'][:60]}")
+                            _ub_result = run_uber_research(
+                                item           = item,
+                                col_name       = _ub_col,
+                                client         = _ub_client,
+                                ollama_url     = _UbOLLAMA,
+                                model          = UBER_RESEARCH_MODEL,
+                                is_night_run   = False,
+                                n_questions    = UBER_GAP_QUESTIONS,
+                                max_urls_per_q = UBER_MAX_URLS_PER_Q,
+                            )
+                            import core.queue as _ubq
+                            _ubq.update_field(item["id"], "uber_research", _ub_result)
+                            print(f"  [OK] New chunks: {_ub_result.get('new_chunks', 0)}  |  Total: {_ub_result.get('total_after', 0)}")
+                            _reset_to_researched(item)
+                            _rf = input("  Reset focus? [Y/n]: ").strip().lower()
+                            if _rf in ("", "y", "yes"):
+                                _clear_focus(item)
+                            gen = input("  Generate now? [Y/n]: ").strip().lower()
+                            if gen in ("", "y", "yes"):
+                                _run_generate(item)
+                        except Exception as _ub_err:
+                            print(f"  Uber Research error: {_ub_err}")
                     elif ch == "2":
                         q = queue.load()
                         for qi in q["items"]:
