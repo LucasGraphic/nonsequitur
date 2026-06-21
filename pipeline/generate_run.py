@@ -2014,6 +2014,16 @@ ARTICLE:
                 _q.update_field(item_id, "scoring_flag", True)
             else:
                 _q.update_field(item_id, "scoring_flag", False)
+            # Append to generation history
+            _q.append_generation(item_id, {
+                "score":   _scoring.get("score"),
+                "verdict": _scoring.get("verdict", ""),
+                "schema":  item.get("article_type", ""),
+                "length":  item.get("article_length", "medium"),
+                "focus":   (item.get("article_focus", "") or "")[:80],
+                "model":   model,
+                "dir":     os.path.basename(article_dir) if article_dir else "",
+            })
         except Exception as _sc_err:
             print(f"   [scoring] Error: {_sc_err} -- skipping")
 

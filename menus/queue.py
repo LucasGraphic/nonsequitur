@@ -740,6 +740,43 @@ def _inspect_edit_item(item: dict) -> None:
                 print(f"  [OK] Reset to pending.")
 
         elif cmd == "v":
+            # Show generation history if available, then article viewer
+            _gens = item.get("generations", [])
+            if _gens:
+                print()
+                print(f"  Generation history ({len(_gens)}):")
+                _VSHORT = {"excellent": "EXCE", "strong": "STRO", "pass": "PASS",
+                           "weak": "WEAK", "fail": "FAIL"}
+                print(f"  {'#':<4} {'Date':<12} {'Score':<6} {'Verdict':<8} {'Schema':<22} {'Len':<8} Focus")
+                print(f"  {'-'*95}")
+                _best_score = max((_g.get('score') or 0) for _g in _gens)
+                for _g in _gens:
+                    _gn  = _g.get('n', '?')
+                    _gd  = (_g.get('date') or '')[:10]
+                    _gs  = str(_g.get('score', '?')) if _g.get('score') is not None else '?'
+                    _gv  = _VSHORT.get((_g.get('verdict') or '').lower(),
+                                       (_g.get('verdict') or '?')[:4].upper())
+                    _gsc = (_g.get('schema') or '-')[:21]
+                    _gl  = (_g.get('length') or '-')[:7]
+                    _gf  = (_g.get('focus') or '-')[:38]
+                    _mark = '  <- best' if (_g.get('score') or 0) == _best_score else ''
+                    print(f"  {_gn:<4} {_gd:<12} {_gs:<6} {_gv:<8} {_gsc:<22} {_gl:<8} {_gf}{_mark}")
+                print()
+                print("  [N] open generation N in Notepad  |  [Enter] view latest in terminal")
+                _vraw = input("  > ").strip()
+                if _vraw.isdigit():
+                    _vn  = int(_vraw)
+                    _vg  = next((_g for _g in _gens if _g.get('n') == _vn), None)
+                    if _vg and _vg.get('dir'):
+                        import subprocess as _vsp
+                        _vart = os.path.join(ROOT_DIR, 'output', _vg['dir'], 'article.md')
+                        if os.path.isfile(_vart):
+                            _vsp.Popen(['notepad.exe', _vart])
+                        else:
+                            print(f"  File not found: {_vart}")
+                    else:
+                        print(f"  Generation {_vn} not found.")
+                    continue  # back to menu without falling into terminal viewer
             # View generated article -- output is a folder per article:
             # output/<date-slug-or-slug>/article.md (+ metadata.json, sources.json)
             import glob as _glob, json as _vjson

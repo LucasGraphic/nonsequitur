@@ -237,6 +237,26 @@ STATUS_LABEL = {
 }
 
 
+def append_generation(item_id: str, gen_data: dict) -> bool:
+    """
+    Append a generation record to item["generations"] list.
+    gen_data keys: score, verdict, schema, length, focus, model, dir, date
+    Automatically sets gen_data["n"] to next generation number.
+    Returns True if item found.
+    """
+    q = load()
+    for item in q["items"]:
+        if item["id"] == item_id:
+            if "generations" not in item:
+                item["generations"] = []
+            gen_data["n"]    = len(item["generations"]) + 1
+            gen_data["date"] = _now()
+            item["generations"].append(gen_data)
+            save(q)
+            return True
+    return False
+
+
 def print_queue(filter_status: Optional[str] = None) -> None:
     """Prints a readable queue list to terminal."""
     items = load()["items"]
