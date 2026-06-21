@@ -1,13 +1,13 @@
 """
-clip.py -- Pobierz URL -> zweryfikuj tekst -> zapisz do Qdrant knowledge base
+clip.py -- Fetch URL -> verify text -> save to Qdrant knowledge base
 
-Użycie:
-    python clip.py --url "https://dev.epicgames.com/..."
-    python clip.py --url "https://..." --category software --tag ue5
-    python clip.py --url "https://..." --dry-run
+Usage:
+    python -m menus.clip --url "https://dev.epicgames.com/..."
+    python -m menus.clip --url "https://..." --category software --tag ue5
+    python -m menus.clip --url "https://..." --dry-run
 
-Jeśli category/tag nie podane -- pyta interaktywnie.
-Jeśli fetch się nie uda -- otwiera edytor do wklejenia tekstu ręcznie.
+If category/tag not provided -- asks interactively.
+If fetch fails -- opens inline editor for manual text paste.
 """
 
 import argparse
@@ -35,7 +35,7 @@ from config import (
     VALKEY_URL,
 )
 
-# FETCH_SERVICE_URL nie jest jeszcze w config.py -- dodaj tam lub zostaw tu
+# FETCH_SERVICE_URL not yet in config.py -- add there or leave here
 try:
     from config import FETCH_SERVICE_URL
 except ImportError:
@@ -60,7 +60,7 @@ VALID_CATEGORIES = {
 CHUNK_SIZE    = RESEARCH_CHUNK_SIZE
 CHUNK_OVERLAP = 80
 
-# Kolory terminala
+# Terminal colors
 GREEN  = "\033[92m"
 YELLOW = "\033[93m"
 RED    = "\033[91m"
@@ -74,7 +74,7 @@ BOLD   = "\033[1m"
 # ---------------------------------------------
 
 def fetch_via_service(url: str) -> str:
-    """Próbuje pobrać tekst przez fetch_service (Playwright) na Ubuntu."""
+    """Attempt to fetch text via fetch_service (Playwright) on Ubuntu."""
     try:
         r = requests.post(
             FETCH_SERVICE_URL,
@@ -87,7 +87,7 @@ def fetch_via_service(url: str) -> str:
             if len(text) > 200:
                 return text
     except Exception as e:
-        print(f"  {YELLOW}[fetch] Playwright service niedostępny: {e}{RESET}")
+        print(f"  {YELLOW}[fetch] Playwright service unavailable: {e}{RESET}")
     return ""
 
 
@@ -114,7 +114,7 @@ def fetch_via_requests(url: str) -> str:
     except Exception:
         pass
 
-    # Ostateczny fallback -- strip HTML
+    # Final fallback -- strip HTML
     try:
         headers = {"User-Agent": "Mozilla/5.0 (compatible; ArticleAgent/1.0)"}
         r = requests.get(url, timeout=10, headers=headers)
@@ -130,17 +130,17 @@ def fetch_via_requests(url: str) -> str:
 
 
 def fetch_url(url: str) -> str:
-    """Próbuje Playwright service, potem requests fallback."""
-    print(f"  -> Pobieranie przez Playwright service...")
+    """Try Playwright service, then requests fallback."""
+    print(f"  -> Fetching via Playwright service...")
     text = fetch_via_service(url)
     if text:
-        print(f"  {GREEN}[OK] Playwright: {len(text)} znaków{RESET}")
+        print(f"  {GREEN}[OK] Playwright: {len(text)} chars{RESET}")
         return text
 
     print(f"  -> Fallback: requests + trafilatura...")
     text = fetch_via_requests(url)
     if text:
-        print(f"  {GREEN}[OK] Requests: {len(text)} znaków{RESET}")
+        print(f"  {GREEN}[OK] Requests: {len(text)} chars{RESET}")
         return text
 
     return ""
@@ -160,19 +160,19 @@ def _load_tags() -> dict:
 
 
 def ask_category() -> str:
-    # Kolejność kategorii -- najpierw najczęściej używane
+    # Category order -- most frequently used first
     cats = ["ai-data", "software", "games", "hardware", "security",
             "entertainment", "photography", "drone", "3d", "other"]
     tags_data = _load_tags()
-    print(f"\n{BOLD}Kategoria:{RESET}")
+    print(f"\n{BOLD}Category:{RESET}")
     for i, c in enumerate(cats, 1):
         tag_count = len(tags_data.get(c, []))
-        print(f"  {CYAN}{i}{RESET}. {c:<20} ({tag_count} tagów)")
+        print(f"  {CYAN}{i}{RESET}. {c:<20} ({tag_count} tags)")
     while True:
-        choice = input(f"  Numer [{CYAN}1-{len(cats)}{RESET}]: ").strip()
+        choice = input(f"  Number [{CYAN}1-{len(cats)}{RESET}]: ").strip()
         if choice.isdigit() and 1 <= int(choice) <= len(cats):
             return cats[int(choice) - 1]
-        print(f"  {RED}Wpisz numer 1-{len(cats)}{RESET}")
+        print(f"  {RED}Enter number 1-{len(cats)}{RESET}")
 
 
 def ask_tag(category: str) -> str:
@@ -184,23 +184,23 @@ def ask_tag(category: str) -> str:
     print(f"\n{BOLD}Tag:{RESET}")
     for i, t in enumerate(cat_tags, 1):
         print(f"  {CYAN}{i}{RESET}. {t}")
-    print(f"  {CYAN}0{RESET}. (brak tagu)")
+    print(f"  {CYAN}0{RESET}. (no tag)")
 
     while True:
-        choice = input(f"  Numer [{CYAN}0-{len(cat_tags)}{RESET}]: ").strip()
+        choice = input(f"  Number [{CYAN}0-{len(cat_tags)}{RESET}]: ").strip()
         if choice == "0" or choice == "":
             return ""
         if choice.isdigit() and 1 <= int(choice) <= len(cat_tags):
             return cat_tags[int(choice) - 1]
-        print(f"  {RED}Wpisz numer 0-{len(cat_tags)}{RESET}")
+        print(f"  {RED}Enter number 0-{len(cat_tags)}{RESET}")
 
 
 def open_editor_for_text(url: str, existing: str = "") -> str:
-    """Wklejanie tekstu bezpośrednio w terminalu. Zakończ linią '---'."""
-    print(f"\n  {CYAN}Wklej tekst artykułu (zakończ linią zawierającą tylko ---){RESET}")
+    """Paste text directly in terminal. End with a line containing only '---'."""
+    print(f"\n  {CYAN}Paste article text (end with a line containing only ---){RESET}")
     print(f"  URL: {url}")
     if existing:
-        print(f"  {YELLOW}Obecny tekst ({len(existing)} znaków) zostanie zastąpiony{RESET}")
+        print(f"  {YELLOW}Existing text ({len(existing)} chars) will be replaced{RESET}")
     print()
 
     lines = []
@@ -218,18 +218,18 @@ def open_editor_for_text(url: str, existing: str = "") -> str:
 
 
 def show_preview(text: str, chars: int = 800) -> None:
-    """Pokazuje podgląd tekstu."""
+    """Show text preview."""
     print(f"\n{BOLD}{'-'*60}{RESET}")
-    print(f"{CYAN}PODGLĄD TEKSTU ({len(text)} znaków):{RESET}")
+    print(f"{CYAN}TEXT PREVIEW ({len(text)} chars):{RESET}")
     print(f"{'-'*60}")
     print(text[:chars])
     if len(text) > chars:
-        print(f"\n{YELLOW}... [{len(text) - chars} znaków więcej]{RESET}")
+        print(f"\n{YELLOW}... [{len(text) - chars} more chars]{RESET}")
     print(f"{'-'*60}")
 
 
 # ---------------------------------------------
-# EMBED + UPSERT (identyczne z manual_feed.py)
+# EMBED + UPSERT
 # ---------------------------------------------
 
 def embed(text: str) -> list | None:
@@ -296,14 +296,14 @@ def upsert_to_qdrant(
     item_id = hashlib.md5(url.encode()).hexdigest()[:8]
 
     raw_chunks = chunk_text(text)
-    print(f"\n  -> {len(raw_chunks)} chunków do wgrania...")
+    print(f"\n  -> {len(raw_chunks)} chunks to upload...")
 
     if dry_run:
-        print(f"  {YELLOW}[dry-run] {len(raw_chunks)} chunków -> {collection}{RESET}")
+        print(f"  {YELLOW}[dry-run] {len(raw_chunks)} chunks -> {collection}{RESET}")
         return len(raw_chunks)
 
     if not ensure_collection(collection):
-        print(f"  {RED}Nie można utworzyć kolekcji: {collection}{RESET}")
+        print(f"  {RED}Cannot create collection: {collection}{RESET}")
         return 0
 
     points = []
@@ -370,9 +370,9 @@ def upsert_to_qdrant(
         timeout=60,
     )
     if r.status_code in (200, 201):
-        print(f"  {GREEN}[OK] {len(points)} chunków -> {collection}{RESET}        ")
+        print(f"  {GREEN}[OK] {len(points)} chunks -> {collection}{RESET}        ")
         return len(points)
-    print(f"  {RED}[qdrant] Błąd: {r.text}{RESET}")
+    print(f"  {RED}[qdrant] Error: {r.text}{RESET}")
     return 0
 
 
@@ -382,12 +382,12 @@ def upsert_to_qdrant(
 
 def main():
     parser = argparse.ArgumentParser(description="clip.py -- URL -> Qdrant knowledge base")
-    parser.add_argument("--url",      required=True, help="URL do pobrania")
-    parser.add_argument("--category", default="",    help="Kategoria (games/software/ai-data/...)")
-    parser.add_argument("--tag",      default="",    help="Tag z tags.json (opcjonalny)")
+    parser.add_argument("--url",      required=True, help="URL to fetch")
+    parser.add_argument("--category", default="",    help="Category (games/software/ai-data/...)")
+    parser.add_argument("--tag",      default="",    help="Tag from tags.json (optional)")
     parser.add_argument("--freshness",default="reference", choices=["reference", "news"])
-    parser.add_argument("--evergreen",action="store_true", help="Zapisz do knowledge_evergreen")
-    parser.add_argument("--dry-run",  action="store_true", help="Tylko podgląd, bez zapisu")
+    parser.add_argument("--evergreen",action="store_true", help="Save to knowledge_evergreen")
+    parser.add_argument("--dry-run",  action="store_true", help="Preview only, no write")
     args = parser.parse_args()
 
     url = args.url.strip()
@@ -397,29 +397,29 @@ def main():
     text = fetch_url(url)
 
     if not text:
-        print(f"  {YELLOW}Fetch nieudany -- wklej tekst ręcznie{RESET}")
+        print(f"  {YELLOW}Fetch failed -- paste text manually{RESET}")
         text = open_editor_for_text(url)
 
     if not text or len(text) < 100:
-        print(f"  {RED}Za mało tekstu ({len(text)} znaków). Przerywam.{RESET}")
+        print(f"  {RED}Not enough text ({len(text)} chars). Aborting.{RESET}")
         sys.exit(1)
 
-    # 2. Podgląd
+    # 2. Preview
     show_preview(text)
 
-    # 3. Czy tekst jest OK?
-    confirm = input(f"\n  Tekst OK? [{GREEN}T{RESET}/n/r(wklej ręcznie)]: ").strip().lower()
+    # 3. Confirm text
+    confirm = input(f"\n  Text OK? [{GREEN}Y{RESET}/n/r(paste manually)]: ").strip().lower()
     if confirm == "n":
-        print("  Anulowano.")
+        print("  Cancelled.")
         sys.exit(0)
     if confirm == "r":
         text = open_editor_for_text(url)
         if not text or len(text) < 100:
-            print(f"  {RED}Za mało tekstu. Przerywam.{RESET}")
+            print(f"  {RED}Not enough text. Aborting.{RESET}")
             sys.exit(1)
         show_preview(text)
 
-    # 4. Kategoria
+    # 4. Category
     category = args.category.strip().lower()
     if not category or category not in VALID_CATEGORIES:
         category = ask_category()
@@ -429,7 +429,7 @@ def main():
     if not tag:
         tag = ask_tag(category)
 
-    # 6. Kolekcja
+    # 6. Collection
     if args.evergreen:
         collection = "knowledge_evergreen"
     else:
@@ -437,20 +437,20 @@ def main():
 
     content_date = datetime.now(timezone.utc).date().isoformat()
 
-    # 7. Podsumowanie przed zapisem
-    print(f"\n{BOLD}Do zapisania:{RESET}")
+    # 7. Summary before save
+    print(f"\n{BOLD}To save:{RESET}")
     print(f"  URL:        {url}")
-    print(f"  Kategoria:  {category}")
-    print(f"  Tag:        {tag or '(brak)'}")
-    print(f"  Kolekcja:   {collection}")
+    print(f"  Category:   {category}")
+    print(f"  Tag:        {tag or '(none)'}")
+    print(f"  Collection: {collection}")
     print(f"  Freshness:  {args.freshness}")
-    print(f"  Tekst:      {len(text)} znaków")
-    print(f"  Chunki:     ~{len(chunk_text(text))}")
+    print(f"  Text:       {len(text)} chars")
+    print(f"  Chunks:     ~{len(chunk_text(text))}")
 
     if not args.dry_run:
-        go = input(f"\n  Zapisać do Qdrant? [{GREEN}T{RESET}/n]: ").strip().lower()
+        go = input(f"\n  Save to Qdrant? [{GREEN}Y{RESET}/n]: ").strip().lower()
         if go == "n":
-            print("  Anulowano.")
+            print("  Cancelled.")
             sys.exit(0)
 
     # 8. Upsert
@@ -466,11 +466,11 @@ def main():
     )
 
     if added:
-        print(f"\n  {GREEN}{BOLD}[OK] Gotowe -- {added} chunków w {collection}{RESET}")
+        print(f"\n  {GREEN}{BOLD}[OK] Done -- {added} chunks in {collection}{RESET}")
     elif args.dry_run:
-        print(f"\n  {YELLOW}Dry-run zakończony.{RESET}")
+        print(f"\n  {YELLOW}Dry-run complete.{RESET}")
     else:
-        print(f"\n  {RED}Błąd zapisu.{RESET}")
+        print(f"\n  {RED}Write error.{RESET}")
 
 
 if __name__ == "__main__":
