@@ -2005,12 +2005,15 @@ ARTICLE:
                 article_type = item.get("article_type", ""),
                 model        = model,
             )
+            # Always update scoring cache in queue for display in list
+            import core.queue as _q
+            _q.update_field(item_id, "scoring_verdict", _scoring.get("verdict", ""))
+            _q.update_field(item_id, "scoring_score", _scoring.get("score"))
             # Flag for human review -- does not block pipeline
             if _scoring.get("verdict") in ("fail", "weak"):
-                import core.queue as _q
                 _q.update_field(item_id, "scoring_flag", True)
-                _q.update_field(item_id, "scoring_verdict", _scoring.get("verdict", ""))
-                _q.update_field(item_id, "scoring_score", _scoring.get("score"))
+            else:
+                _q.update_field(item_id, "scoring_flag", False)
         except Exception as _sc_err:
             print(f"   [scoring] Error: {_sc_err} -- skipping")
 
