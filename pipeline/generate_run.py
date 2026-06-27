@@ -1727,6 +1727,7 @@ def run_generate(item_ids: list = None, api_provider: str = "", night_run: bool 
                                 context_research = context_research,
                                 model            = _fp_model,
                                 ollama_url       = OLLAMA_URL,
+                                schema_type      = item.get("article_type", ""),
                             )
                             if article_focus:
                                 item["article_focus"] = article_focus
@@ -1745,6 +1746,7 @@ def run_generate(item_ids: list = None, api_provider: str = "", night_run: bool 
                             context_research = context_research,
                             model            = _fp_model,
                             ollama_url       = OLLAMA_URL,
+                            schema_type      = item.get("article_type", ""),
                         )
                         if article_focus:
                             item["article_focus"] = article_focus

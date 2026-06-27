@@ -7,13 +7,16 @@ import re
 import requests
 
 
-def run_focus_picker(topic: str, context_research: str, model: str,
-                     ollama_url: str) -> str:
-    """Generate 20 article angles and let user pick one interactively.
+# Schemas where BM25 systematically underscores thematic/argumentative focuses.
+# Validator score is still shown but marked [arg] -- treat as orientation only.
+_ARG_SCHEMAS = {"games_analysis", "op_ed", "industry_analysis"}
 
-    Returns:
-        Selected/edited focus string, or "" if skipped.
-    """
+
+def run_focus_picker(topic: str, context_research: str, model: str,
+                     ollama_url: str, schema_type: str = "") -> str:
+    # Generate 20 article angles and let user pick one interactively.
+    # schema_type: used to flag argumentative schemas with [arg] marker.
+    # Returns selected/edited focus string, or "" if skipped.
     research_preview = context_research[:12000]
 
     prompt = f"""You are an editorial strategist for a tech and gaming blog.
@@ -69,7 +72,13 @@ Format: N. [angle text]
         return ""
 
     angles = angles[:20]
-    _display(topic, angles)
+
+    # Score each angle with BM25 against research context
+    from pipeline.focus_validator import _bm25_support
+    _bm25_scores = [_bm25_support(a, context_research) for a in angles]
+    _is_arg = schema_type.lower() in _ARG_SCHEMAS
+
+    _display(topic, angles, _bm25_scores, _is_arg)
 
     return _prompt_loop(angles)
 
@@ -86,26 +95,38 @@ def _validate_angle(text: str) -> bool:
         return False
     return True
 
-def _display(topic: str, angles: list) -> None:
+def _bm25_bar(score: float) -> str:
+    # Visual bar: 5 blocks, each block = 0.5 score units, max shown at 2.5+
+    filled = min(5, int(score / 0.5))
+    return "[" + "#" * filled + "." * (5 - filled) + "]" + f" {score:.1f}"
+
+
+def _display(topic: str, angles: list, bm25_scores: list = None, is_arg: bool = False) -> None:
     print()
     print(f"  -- Focus Picker {'-' * 50}")
     print(f"  Topic: {topic[:80]}")
+    if is_arg:
+        print(f"  [arg] Argumentative schema -- BM25 scores are orientation only, not quality gates")
     print(f"  {'-' * 66}")
     for i, angle in enumerate(angles, 1):
-        # Wrap long angles at 70 chars
+        score_str = ""
+        if bm25_scores and i - 1 < len(bm25_scores):
+            score_str = "  " + _bm25_bar(bm25_scores[i - 1])
         prefix = f"  [{i:2}]  "
-        wrap_w = 70
+        wrap_w = 62
         if len(angle) <= wrap_w:
-            print(f"{prefix}{angle}")
+            print(f"{prefix}{angle}{score_str}")
         else:
-            # First line
             print(f"{prefix}{angle[:wrap_w]}")
-            # Continuation lines indented to match
             cont = " " * len(prefix)
             rest = angle[wrap_w:]
             while rest:
-                print(f"{cont}{rest[:wrap_w]}")
-                rest = rest[wrap_w:]
+                chunk = rest[:wrap_w]
+                rest  = rest[wrap_w:]
+                if rest:
+                    print(f"{cont}{chunk}")
+                else:
+                    print(f"{cont}{chunk}{score_str}")
     print(f"  {'-' * 66}")
     print(f"  [1-{len(angles)}] select  [e N] edit  [0] custom  [s] skip")
     print()
