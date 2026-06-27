@@ -34,22 +34,6 @@ from pipeline.generate_run  import run_generate
 # -- Session state -- API provider selected for this run --------------------
 # "" = local Ollama (default)
 
-def _print_splash():
-    W = 44
-    def ml(t=''):
-        return '  |' + t[:W] + ' ' * (W - len(t[:W])) + '|'
-    print()
-    print('  +' + '=' * 44 + '+')
-    print(ml())
-    print(ml('  N O N S E Q U I T U R'))
-    print(ml('  Autonomous Research & Publishing Platform'))
-    print(ml())
-    print('  |  ' + '-' * 40 + '  |')
-    print(ml())
-    print(ml('  lucasgraphic.com'))
-    print(ml())
-    print('  +' + '=' * 44 + '+')
-    print()
 
 _SESSION_API_PROVIDER = ""
 
@@ -494,7 +478,8 @@ def interactive_menu() -> None:
 # -- CLI --------------------------------------------------------------------
 
 def main():
-    _print_splash()
+    from banner import show as _banner_show
+    _banner_show()
     if not _check_connections():
         sys.exit(1)
 
