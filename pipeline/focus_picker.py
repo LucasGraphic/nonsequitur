@@ -80,7 +80,33 @@ Format: N. [angle text]
 
     _display(topic, angles, _bm25_scores, _is_arg)
 
-    return _prompt_loop(angles)
+    result = _prompt_loop(angles)
+
+    # Reroll loop -- regenerate with higher temperature for fresh angles
+    _reroll_temp = 0.95
+    while result == "__REROLL__":
+        try:
+            payload["options"]["temperature"] = _reroll_temp
+            r = requests.post(f"{ollama_url}/api/chat", json=payload, timeout=120)
+            r.raise_for_status()
+            raw = r.json().get("message", {}).get("content", "").strip()
+        except Exception as e:
+            print(f"  [picker] Reroll error: {e}")
+            return ""
+        angles = []
+        for line in raw.splitlines():
+            m = re.match(r"^\s*(\d+)[.)]\s+(.+)", line)
+            if m:
+                angles.append(m.group(2).strip())
+        if not angles:
+            print("  [picker] Reroll returned no angles -- skipping.")
+            return ""
+        angles = angles[:20]
+        _bm25_scores = [_bm25_support(a, context_research) for a in angles]
+        _display(topic, angles, _bm25_scores, _is_arg)
+        result = _prompt_loop(angles)
+
+    return result
 
 
 
@@ -128,13 +154,18 @@ def _display(topic: str, angles: list, bm25_scores: list = None, is_arg: bool = 
                 else:
                     print(f"{cont}{chunk}{score_str}")
     print(f"  {'-' * 66}")
-    print(f"  [1-{len(angles)}] select  [e N] edit  [0] custom  [s] skip")
+    print(f"  [1-{len(angles)}] select  [e N] edit  [0] custom  [r] reroll  [s] skip")
     print()
 
 
 def _prompt_loop(angles: list) -> str:
     while True:
         raw = input("  > ").strip()
+
+        # Reroll
+        if raw.lower() == "r":
+            print("  [picker] Rerolling -- generating 20 new angles...")
+            return "__REROLL__"
 
         # Skip
         if raw.lower() == "s":
