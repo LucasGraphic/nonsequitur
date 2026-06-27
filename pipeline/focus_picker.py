@@ -78,9 +78,15 @@ Format: N. [angle text]
     _bm25_scores = [_bm25_support(a, context_research) for a in angles]
     _is_arg = schema_type.lower() in _ARG_SCHEMAS
 
-    _display(topic, angles, _bm25_scores, _is_arg)
+    # Sort by BM25 descending -- original index preserved for selection
+    _indexed = sorted(enumerate(angles), key=lambda x: _bm25_scores[x[0]], reverse=True)
+    _sorted_angles = [a for _, a in _indexed]
+    _sorted_scores = [_bm25_scores[i] for i, _ in _indexed]
+    _orig_idx      = [i + 1 for i, _ in _indexed]
 
-    result = _prompt_loop(angles)
+    _display(topic, _sorted_angles, _sorted_scores, _is_arg, _orig_idx)
+
+    result = _prompt_loop(_sorted_angles)
 
     # Reroll loop -- regenerate with higher temperature for fresh angles
     _reroll_temp = 0.95
@@ -103,8 +109,12 @@ Format: N. [angle text]
             return ""
         angles = angles[:20]
         _bm25_scores = [_bm25_support(a, context_research) for a in angles]
-        _display(topic, angles, _bm25_scores, _is_arg)
-        result = _prompt_loop(angles)
+        _indexed = sorted(enumerate(angles), key=lambda x: _bm25_scores[x[0]], reverse=True)
+        _sorted_angles = [a for _, a in _indexed]
+        _sorted_scores = [_bm25_scores[i] for i, _ in _indexed]
+        _orig_idx      = [i + 1 for i, _ in _indexed]
+        _display(topic, _sorted_angles, _sorted_scores, _is_arg, _orig_idx)
+        result = _prompt_loop(_sorted_angles)
 
     return result
 
@@ -121,38 +131,37 @@ def _validate_angle(text: str) -> bool:
         return False
     return True
 
-def _bm25_bar(score: float) -> str:
-    # Visual bar: 5 blocks, each block = 0.5 score units, max shown at 2.5+
-    filled = min(5, int(score / 0.5))
-    return "[" + "#" * filled + "." * (5 - filled) + "]" + f" {score:.1f}"
-
-
-def _display(topic: str, angles: list, bm25_scores: list = None, is_arg: bool = False) -> None:
+def _display(topic: str, angles: list, bm25_scores: list = None,
+             is_arg: bool = False, orig_idx: list = None) -> None:
+    # Layout: number col (5) + score col (5) + angle text (remaining)
+    # Score right-aligned in fixed column -- easy vertical comparison
+    SCORE_W = 5   # '  1.2' or '  ---'
+    WRAP_W  = 58
     print()
     print(f"  -- Focus Picker {'-' * 50}")
     print(f"  Topic: {topic[:80]}")
     if is_arg:
-        print(f"  [arg] Argumentative schema -- BM25 scores are orientation only, not quality gates")
+        print(f"  [arg] Argumentative schema -- BM25 order is orientation only")
+    print(f"  {'#':<5} {'cov':>{SCORE_W}}  angle")
     print(f"  {'-' * 66}")
     for i, angle in enumerate(angles, 1):
-        score_str = ""
+        orig = f"({orig_idx[i-1]})" if orig_idx else ""
+        num_str = f"  {i:<3}{orig:<4}"
         if bm25_scores and i - 1 < len(bm25_scores):
-            score_str = "  " + _bm25_bar(bm25_scores[i - 1])
-        prefix = f"  [{i:2}]  "
-        wrap_w = 62
-        if len(angle) <= wrap_w:
-            print(f"{prefix}{angle}{score_str}")
+            s = bm25_scores[i - 1]
+            score_str = f"{s:>{SCORE_W}.1f}"
         else:
-            print(f"{prefix}{angle[:wrap_w]}")
-            cont = " " * len(prefix)
-            rest = angle[wrap_w:]
+            score_str = f"{'---':>{SCORE_W}}"
+        prefix     = f"{num_str} {score_str}  "
+        cont        = " " * len(prefix)
+        if len(angle) <= WRAP_W:
+            print(f"{prefix}{angle}")
+        else:
+            print(f"{prefix}{angle[:WRAP_W]}")
+            rest = angle[WRAP_W:]
             while rest:
-                chunk = rest[:wrap_w]
-                rest  = rest[wrap_w:]
-                if rest:
-                    print(f"{cont}{chunk}")
-                else:
-                    print(f"{cont}{chunk}{score_str}")
+                print(f"{cont}{rest[:WRAP_W]}")
+                rest = rest[WRAP_W:]
     print(f"  {'-' * 66}")
     print(f"  [1-{len(angles)}] select  [e N] edit  [0] custom  [r] reroll  [s] skip")
     print()
