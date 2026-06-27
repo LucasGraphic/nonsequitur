@@ -14,9 +14,23 @@ The system searches the web, reads sources, builds a permanent knowledge base, a
 2. **Researches** each topic: targeted queries, full-text crawling, vector indexing into Qdrant
 3. **Generates** articles with a human-chosen thesis angle and your personal voice injected via RAG
 4. **Scores** the result — 8-phase editorial scoring with concrete improvement suggestions
-5. **Optionally rewrites** via Claude, Gemini, Groq, DeepSeek, or local Ollama
+5. **Translates** finished articles to Polish or Norwegian via local Bielik model (on demand)
+6. **Optionally rewrites** via Claude, Gemini, Groq, DeepSeek, or local Ollama
 
 The pipeline runs unattended overnight. Focus angles are chosen by you before generation. The model cannot override the editorial direction.
+
+---
+
+## Screenshots
+
+| | |
+|---|---|
+| ![Queue](docs/screenshots/02_queue_list.png) | ![Focus picker](docs/screenshots/06_focus_picker_.png) |
+| Queue with score/verdict/schema per item | Focus picker — 20 angles sorted by BM25 research coverage |
+| ![Uber Research](docs/screenshots/04_uber_research.png) | ![Scoring](docs/screenshots/07_scoring_system.png) |
+| Uber Research — gap analysis + targeted search | Full scoring breakdown with Q1–Q8 signal audit |
+
+→ [docs/screenshots/](docs/screenshots/) for all 9 screenshots with descriptions.
 
 ---
 
@@ -27,7 +41,7 @@ Discovery ──► Research ──► Suitability Gate ──► Schema ──�
    │              │                               Suggest    Picker       │           │
 SearXNG        Qdrant                             BM25+LLM   BM25+LLM   Ollama     qwen3.6
 Reddit         Crawl4AI                                      Validator   27b/122b   27b
-Google News    Reranker                                                             think=True
+Google News    Reranker                                      BM25 sort   think=True
                     └──► Uber Research (gap analysis + targeted search, if thin)
 ```
 
@@ -35,28 +49,30 @@ Google News    Reranker                                                         
 
 ## Stack
 
-| Component | Technology | Host |
-|-----------|-----------|------|
-| LLM Generate | Ollama + qwen3.6:27b / qwen3.5:122b | Windows, RTX 5090 |
-| LLM Embed | Ollama + qwen3-embedding:8b-q8_0 | Ubuntu, GTX 1080 |
-| LLM Score | Ollama + qwen3.6:27b (think=True) | Windows, RTX 5090 |
-| Vector DB | Qdrant | Ubuntu |
-| Neural Reranker | BAAI/bge-reranker-v2-m3 (FastAPI) | Ubuntu, GTX 1080 |
-| Web Search | SearXNG (self-hosted) | Ubuntu |
-| Web Crawler | Crawl4AI (FastAPI + Chromium) | Ubuntu |
-| Cache | Valkey (Redis-compatible) | Ubuntu |
-| CMS | PayloadCMS 3.x + MongoDB | Ubuntu |
-| Frontend | Next.js 15 + Tailwind CSS v4 | Ubuntu |
+| Component       | Technology                          | Host              |
+| --------------- | ----------------------------------- | ----------------- |
+| LLM Generate    | Ollama + qwen3.6:27b / qwen3.5:122b | Windows, RTX 5090 |
+| LLM Embed       | Ollama + qwen3-embedding:8b-q8\_0   | Ubuntu, GTX 1080  |
+| LLM Score       | Ollama + qwen3.6:27b (think=True)   | Windows, RTX 5090 |
+| LLM Translate   | Ollama + Bielik 11B v2.2 Q8\_0      | Windows, RTX 5090 |
+| Vector DB       | Qdrant                              | Ubuntu            |
+| Neural Reranker | BAAI/bge-reranker-v2-m3 (FastAPI)   | Ubuntu, GTX 1080  |
+| Web Search      | SearXNG (self-hosted)               | Ubuntu            |
+| Web Crawler     | Crawl4AI (FastAPI + Chromium)       | Ubuntu            |
+| Cache           | Valkey (Redis-compatible)           | Ubuntu            |
+| CMS             | PayloadCMS 3.x + MongoDB            | Ubuntu            |
+| Frontend        | Next.js 15 + Tailwind CSS v4        | Ubuntu            |
 
 ### Model Tiers
 
-| Key | Model | Use |
-|-----|-------|-----|
-| DEV | qwen2.5:7b | Testing, metadata, fast iteration |
-| NORMAL | qwen3.6:27b dense | Production generation, scoring, schema suggest |
-| NORMAL2 | qwen3.5:35b-a3b MoE | Generate variant for factual articles |
-| MAX | qwen3.5:122b MoE | Maximum quality, temperature 0.2 |
-| Embed | qwen3-embedding:8b-q8_0 | 4096-dim dense vectors |
+| Key       | Model                    | Use                                            |
+| --------- | ------------------------ | ---------------------------------------------- |
+| DEV       | qwen2.5:7b               | Testing, metadata, fast iteration              |
+| NORMAL    | qwen3.6:27b dense        | Production generation, scoring, schema suggest |
+| NORMAL2   | qwen3.5:35b-a3b MoE      | Generate variant for factual articles          |
+| MAX       | qwen3.5:122b MoE         | Maximum quality, temperature 0.2               |
+| Embed     | qwen3-embedding:8b-q8\_0 | 4096-dim dense vectors                         |
+| Translate | Bielik 11B v2.2 Q8\_0    | Polish / Norwegian translation (on demand)     |
 
 ---
 
@@ -65,11 +81,13 @@ Google News    Reranker                                                         
 Two machines is the practical minimum. One machine is possible but expect VRAM contention — the embedding server, Qdrant, reranker, SearXNG, and Crawl4AI need to be available 24/7 alongside the main LLM.
 
 **Machine 1 — Windows (LLM inference):**
+
 - NVIDIA GPU, 24GB+ VRAM (RTX 3090 minimum for 27b models)
-- Ollama with models pulled: `qwen3.6:27b`, `qwen3.5:35b-a3b`, `qwen2.5:7b`
+- Ollama with models pulled: `qwen3.6:27b`, `qwen3.5:35b-a3b`, `qwen2.5:7b`, `SpeakLeash/bielik-11b-v2.2-instruct:Q8_0`
 - Python 3.11+
 
 **Machine 2 — Ubuntu (services):**
+
 - Any NVIDIA GPU for embedding and reranking (GTX 1080 8GB is sufficient)
 - Qdrant, SearXNG, Crawl4AI, Valkey, BAAI reranker, Playwright service
 
@@ -79,7 +97,7 @@ See [docs/setup.md](docs/setup.md) for full installation steps.
 
 ## Quick Start
 
-```bash
+```
 git clone https://github.com/LucasGraphic/nonsequitur
 cd nonsequitur
 pip install -r requirements.txt
@@ -89,6 +107,7 @@ python nonsequitur.py
 ```
 
 Before first run you need:
+
 - Services running on Machine 2 (see [docs/setup.md](docs/setup.md))
 - A `persona_{name}` collection in Qdrant (see [docs/persona-system.md](docs/persona-system.md))
 - SearXNG configured with your preferred engines
@@ -108,10 +127,11 @@ Before first run you need:
 - [x] Dynamic persona list from Qdrant — add new personas without config changes
 - [x] Focus angle enforcement — model cannot override
 - [x] Schema Suggester — BM25 + LLM selects from 12 article schemas
-- [x] Focus Picker — 20 LLM angles, human selects before generation
+- [x] Focus Picker — 20 LLM angles sorted by BM25 research coverage, `[r]` reroll for fresh angles
 - [x] Focus Validator — BM25 + LLM check before generation
 - [x] Scoring Pass — 8-phase quality scoring with prescription (EXCELLENT/STRONG/PASS/WEAK/FAIL)
 - [x] Generation history — score/schema/length tracked per article, viewable in queue
+- [x] Translation — on-demand Polish/Norwegian via Bielik 11B, saved alongside source article
 - [x] Night run — autonomous batch pipeline
 - [x] Clip — paste URL directly into research queue
 
@@ -128,19 +148,20 @@ Before first run you need:
 - [docs/persona-system.md](docs/persona-system.md) — building and managing author voice
 - [docs/rag-architecture.md](docs/rag-architecture.md) — retrieval, reranking, knowledge base
 - [docs/schemas.md](docs/schemas.md) — article schemas and when to use each
+- [docs/screenshots/](docs/screenshots/) — annotated screenshots
 
 ---
 
 ## Performance
 
-| Metric | Value |
-|--------|-------|
-| Research time (~40 URLs) | 5–6 min |
-| Generate time (27b) | 150–220s |
-| Article body | 6000–12000 chars |
-| RAG pool before reranking | 100 chunks |
-| RAG top-k after reranking | ~28 chunks |
-| Embedding dimensions | 4096 |
+| Metric                    | Value            |
+| ------------------------- | ---------------- |
+| Research time (~40 URLs)  | 5–6 min          |
+| Generate time (27b)       | 150–220s         |
+| Article body              | 6000–12000 chars |
+| RAG pool before reranking | 100 chunks       |
+| RAG top-k after reranking | ~28 chunks       |
+| Embedding dimensions      | 4096             |
 
 ---
 
@@ -154,8 +175,7 @@ Every article is anchored to a thesis the author chose. The pipeline automates t
 
 ## Author
 
-**Łukasz Grochal** — photographer, web developer, AI art creator.
-[lucasgraphic.com](https://lucasgraphic.com) · Norway
+**Łukasz Grochal** — photographer, web developer, AI art creator. [lucasgraphic.com](https://lucasgraphic.com) · Norway
 
 ---
 
