@@ -765,7 +765,21 @@ def _inspect_edit_item(item: dict) -> None:
                     _vg  = next((_g for _g in _gens if _g.get('n') == _vn), None)
                     if _vg and _vg.get('dir'):
                         import subprocess as _vsp
-                        _vart = os.path.join(ROOT_DIR, 'output', _vg['dir'], 'article.md')
+                        _vdir = os.path.join(ROOT_DIR, 'output', _vg['dir'])
+                        _vart = os.path.join(_vdir, 'article.md')
+                        # Check for translated versions
+                        _vtrans = [(lc, os.path.join(_vdir, f'article_{lc}.md'))
+                                   for lc in ('pl', 'no')
+                                   if os.path.isfile(os.path.join(_vdir, f'article_{lc}.md'))]
+                        if _vtrans:
+                            _vfiles = [('en', _vart)] + _vtrans
+                            _vlabels = {'en': 'English (article.md)', 'pl': 'Polish (article_pl.md)', 'no': 'Norwegian (article_no.md)'}
+                            print()
+                            for _vfi, (_vlc, _vfp) in enumerate(_vfiles, 1):
+                                print(f"  [{_vfi}] {_vlabels[_vlc]}")
+                            _vfraw = input("  File (Enter = English): ").strip()
+                            if _vfraw.isdigit() and 1 <= int(_vfraw) <= len(_vfiles):
+                                _vart = _vfiles[int(_vfraw) - 1][1]
                         if os.path.isfile(_vart):
                             _vsp.Popen(['notepad.exe', _vart])
                         else:
