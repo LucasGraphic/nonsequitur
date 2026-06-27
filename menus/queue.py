@@ -432,10 +432,6 @@ def _inspect_edit_item(item: dict) -> None:
                 _focus_rest = _focus_rest[_focus_w:]
         print(f"  |  Length   : {item.get('article_length', 'medium')}")
         print(f"  |  Schema   : {item.get('article_type', '') or '(none -- default schema)'}")
-        print(f"  |  Lang     : {item.get('article_lang', 'en')}")
-        _tr_flag = item.get('translate', False)
-        _tr_lang = item.get('article_lang', 'pl')
-        print(f"  |  Translate: {'yes (article_' + _tr_lang + '.md)' if _tr_flag else 'no'}")
         print(f"  |  Slug     : {item.get('topic_slug', '') or '(none)'}")
         print(f"  |  Notes    : {item.get('notes', '') or '(none)'}")
         seed_urls = item.get("seed_urls", [])
@@ -460,7 +456,7 @@ def _inspect_edit_item(item: dict) -> None:
         status = item.get("status", "")
         can_generate = status in (queue.STATUS_RESEARCHED, queue.STATUS_DONE)
         gen_hint = "  [g] generate now" if can_generate else ""
-        print(f"  Edit: [t] topic  [m] model  [p] persona  [f] focus  [c] category  [n] notes  [l] slug  [z] length  [a] schema  [y] lang  [tr] translate")
+        print(f"  Edit: [t] topic  [m] model  [p] persona  [f] focus  [c] category  [n] notes  [l] slug  [z] length  [a] schema  [tr] translate now")
         print(f"        [u] seed URLs (+add / clear)  [r] redo  [x] remove  [s] RAG sources  [sc] score  [v] view{gen_hint}  [Enter] back")
         print()
 
@@ -985,66 +981,87 @@ def _inspect_edit_item(item: dict) -> None:
             else:
                 print("  Invalid number.")
 
-        elif cmd == "y":
-            _langs = ["en", "pl", "no"]
-            _lang_label = {"en": "English (no translation)", "pl": "Polish", "no": "Norwegian"}
-            current = item.get("article_lang", "en")
-            print(f"  Current language: {current}  --  {_lang_label.get(current, current)}")
-            print()
-            for idx, l in enumerate(_langs, 1):
-                marker = " <-" if l == current else ""
-                print(f"  [{idx}] {l:<4}  --  {_lang_label[l]}{marker}")
-            print(f"  [0] Keep current")
-            raw_y = input("  Number: ").strip()
-            if raw_y == "0" or raw_y == "":
-                pass
-            elif raw_y.isdigit() and 1 <= int(raw_y) <= len(_langs):
-                new_val = _langs[int(raw_y) - 1]
-                q = queue.load()
-                for qi in q["items"]:
-                    if qi["id"] == item["id"]:
-                        qi["article_lang"] = new_val
-                        item["article_lang"] = new_val
-                        break
-                queue.save(q)
-                print(f"  [OK] Language updated: {new_val}")
-            else:
-                print("  Invalid number.")
-
-
         elif cmd == "tr":
-            current_tr = item.get("translate", False)
-            current_lang = item.get("article_lang", "en")
-            if current_tr:
-                # Toggle off
-                q = queue.load()
-                for qi in q["items"]:
-                    if qi["id"] == item["id"]:
-                        qi["translate"] = False
-                        item["translate"] = False
-                        break
-                queue.save(q)
-                print(f"  [OK] Translation disabled")
+            # Immediate translation of existing article using TRANSLATE_MODEL (Bielik)
+            _gens = item.get("generations", [])
+            _gens_with_dir = [_g for _g in _gens if _g.get("dir")]
+            if not _gens_with_dir:
+                print("  [!] No article found -- generate first")
             else:
-                # Toggle on  --  pick language
-                _langs = ["pl", "no"]
-                _lang_label = {"pl": "Polish", "no": "Norwegian"}
-                print(f"  Translate to:")
-                for idx, l in enumerate(_langs, 1):
-                    marker = " <-" if l == current_lang else ""
-                    print(f"  [{idx}] {l:<4}  --  {_lang_label[l]}{marker}")
-                raw_tr = input("  Number (Enter = pl): ").strip()
-                lang = _langs[int(raw_tr)-1] if raw_tr.isdigit() and 1 <= int(raw_tr) <= len(_langs) else "pl"
-                q = queue.load()
-                for qi in q["items"]:
-                    if qi["id"] == item["id"]:
-                        qi["translate"] = True
-                        qi["article_lang"] = lang
-                        item["translate"] = True
-                        item["article_lang"] = lang
-                        break
-                queue.save(q)
-                print(f"  [OK] Translation enabled: article_{lang}.md will be saved")
+                # Pick generation -- show table if more than one
+                _chosen_dir = None
+                if len(_gens_with_dir) == 1:
+                    _chosen_dir = _gens_with_dir[0]["dir"]
+                else:
+                    _TRSHORT = {"excellent": "EXCE", "strong": "STRO", "pass": "PASS",
+                                "weak": "WEAK", "fail": "FAIL"}
+                    _best_score = max((_g.get("score") or 0) for _g in _gens_with_dir)
+                    print()
+                    print(f"  {'#':<4} {'Date':<12} {'Score':<6} {'Verdict':<8} {'Schema':<22} {'Len':<8} Focus")
+                    print(f"  {'-'*95}")
+                    for _g in _gens_with_dir:
+                        _gn  = _g.get("n", "?")
+                        _gd  = (_g.get("date") or "")[:10]
+                        _gs  = str(_g.get("score", "?")) if _g.get("score") is not None else "?"
+                        _gv  = _TRSHORT.get((_g.get("verdict") or "").lower(),
+                                             (_g.get("verdict") or "?")[:4].upper())
+                        _gsc = (_g.get("schema") or "-")[:21]
+                        _gl  = (_g.get("length") or "-")[:7]
+                        _gf  = (_g.get("focus") or "-")[:38]
+                        _mark = "  <- best" if (_g.get("score") or 0) == _best_score else ""
+                        print(f"  {_gn:<4} {_gd:<12} {_gs:<6} {_gv:<8} {_gsc:<22} {_gl:<8} {_gf}{_mark}")
+                    print()
+                    _raw_gn = input("  Generation number (Enter = latest): ").strip()
+                    if _raw_gn.isdigit():
+                        _picked = next((_g for _g in _gens_with_dir if _g.get("n") == int(_raw_gn)), None)
+                        _chosen_dir = _picked["dir"] if _picked else None
+                    else:
+                        _chosen_dir = _gens_with_dir[-1]["dir"]
+                    if not _chosen_dir:
+                        print("  [!] Generation not found")
+                if _chosen_dir:
+                    from config import OUTPUT_DIR as _OUT, TRANSLATE_MODEL as _TM, OLLAMA_URL as _TU
+                    import requests as _req
+                    _article_dir  = os.path.join(_OUT, _chosen_dir)
+                    _article_path = os.path.join(_article_dir, "article.md")
+                    if not os.path.exists(_article_path):
+                        print(f"  [!] article.md not found in {_chosen_dir}")
+                    else:
+                        _tr_langs  = ["pl", "no"]
+                        _tr_labels = {"pl": "Polish", "no": "Norwegian"}
+                        _tr_plname = {"pl": "polski", "no": "norweski"}
+                        print("  Translate to:")
+                        for _ti, _tl in enumerate(_tr_langs, 1):
+                            print(f"  [{_ti}] {_tl}  --  {_tr_labels[_tl]}")
+                        _raw_tr = input("  Number (Enter = pl): ").strip()
+                        _tl_code = _tr_langs[int(_raw_tr)-1] if _raw_tr.isdigit() and 1 <= int(_raw_tr) <= len(_tr_langs) else "pl"
+                        _tl_out  = os.path.join(_article_dir, f"article_{_tl_code}.md")
+                        _body    = open(_article_path, encoding="utf-8").read()
+                        _prompt  = (
+                            f"Przetlumacz ponizszy artykul na jezyk {_tr_plname[_tl_code]}.\n"
+                            "Zachowaj dokladnie cale formatowanie Markdown: naglowki (##), "
+                            "pogrubienia, kursywy, puste linie miedzy akapitami.\n"
+                            "Tlumacz wylacznie tekst. Nie dodawaj, nie usuwaj i nie przepisuj tresci.\n"
+                            "Wypisz tylko przetlumaczony artykul, nic wiecej.\n"
+                            "\nARTYKUL:\n"
+                            + _body
+                        )
+                        print(f"  -> Translating to {_tr_labels[_tl_code]} using {_TM}...")
+                        try:
+                            _tr_r = _req.post(
+                                f"{_TU}/api/generate",
+                                json={"model": _TM, "prompt": _prompt, "stream": False,
+                                      "options": {"num_predict": 6000, "temperature": 0.1}},
+                                timeout=600,
+                            )
+                            _tr_text = _tr_r.json().get("response", "").strip()
+                            if _tr_text and len(_tr_text) > 200:
+                                open(_tl_out, "w", encoding="utf-8").write(_tr_text)
+                                print(f"  [OK] Saved: article_{_tl_code}.md  ({len(_tr_text)} chars)")
+                            else:
+                                print(f"  [!] Translation too short ({len(_tr_text)} chars) -- not saved")
+                        except Exception as _te:
+                            print(f"  [!] Translation error: {_te}")
 
         elif cmd == "x":
             confirm = input(f"  Remove [{item['id']}] {item['topic'][:50]}? [y/N]: ").strip().lower()

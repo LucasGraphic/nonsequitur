@@ -255,6 +255,9 @@ UBER_RESEARCH_MODEL    = "qwen3.6:27b"   # model for gap analysis
 UBER_GAP_QUESTIONS     = 4               # number of gap questions to generate
 UBER_MAX_URLS_PER_Q    = 8               # max URLs to fetch per question
 
+# --- Translation (S33) ---
+TRANSLATE_MODEL = "SpeakLeash/bielik-11b-v2.2-instruct:Q8_0"  # Polish/Norwegian translation
+
 
 
 PERSONA_DIMENSIONS = {
