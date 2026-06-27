@@ -1,116 +1,150 @@
 # NonSequitur
 
-An autonomous content pipeline for people who want to write about things the mainstream press ignores, undercovers, or sanitizes — and want the research done for them.
+> *The LLM writes. You argue.*
 
-The system searches the web, reads sources, builds a permanent knowledge base, and generates articles in your voice. It runs overnight without supervision. You handle editorial direction; it handles the labour.
+Most AI writing tools give you a generic article. NonSequitur gives you a researched argument — in your voice, on topics the mainstream press ignores.
+
+You pick the thesis. The pipeline does the rest.
 
 **Live output:** [lucasgraphic.com](https://lucasgraphic.com)
 
 ---
 
-## What It Does
+## Why not just use ChatGPT?
 
-1. **Discovers** topics from SearXNG, Reddit, and Google News — filtered by domain trust, deduplicated
-2. **Researches** each topic: targeted queries, full-text crawling, vector indexing into Qdrant
-3. **Generates** articles with a human-chosen thesis angle and your personal voice injected via RAG
-4. **Scores** the result — 8-phase editorial scoring with concrete improvement suggestions
-5. **Translates** finished articles to Polish or Norwegian via local Bielik model (on demand)
-6. **Optionally rewrites** via Claude, Gemini, Groq, DeepSeek, or local Ollama
+You probably already tried. Here is what you ran into:
 
-The pipeline runs unattended overnight. Focus angles are chosen by you before generation. The model cannot override the editorial direction.
+**It sounds like ChatGPT.** Every output has the same hedged, balanced, inoffensive tone. "On one hand... on the other hand..." It has no opinion because it was trained to have no opinion. You can prompt it to be more direct, but the underlying voice never changes.
+
+**It hallucinates sources.** Ask it to cite something and it invents plausible-sounding URLs. The article reads well. The research does not exist.
+
+**It has no memory.** Start a new session and it knows nothing about your previous work, your knowledge base, your voice, or the sources you already crawled. Every run starts from zero.
+
+**It drifts off-topic.** Give it a specific thesis and it will summarize the topic instead. The argument you wanted becomes a balanced overview nobody asked for.
+
+**It writes about what everyone else is writing about.** ChatGPT's training data is mainstream. Its topic suggestions are mainstream. Its angles are mainstream. If you want to cover what IGN and TechCrunch already covered, it works fine.
+
+NonSequitur is built to solve all of these — specifically, not generally.
 
 ---
 
-## Screenshots
+## The problem with AI writing
+
+ChatGPT writes in ChatGPT's voice. It hallucinates sources. It has no memory between sessions. It produces the same balanced, hedged, inoffensive take every time.
+
+NonSequitur is built around the opposite assumptions:
+
+- Every article starts with a **mandatory thesis** you chose — the model cannot override it
+- Research is real: web crawling, full-text indexing, neural reranking — no hallucinated citations
+- Your voice is injected via RAG from a personal persona collection you built yourself
+- A scoring system tells you *why* an article is weak and *what specifically* to fix
+
+---
+
+## What it looks like
 
 | | |
 |---|---|
 | ![Queue](docs/screenshots/02_queue_list.png) | ![Focus picker](docs/screenshots/06_focus_picker_.png) |
-| Queue with score/verdict/schema per item | Focus picker — 20 angles sorted by BM25 research coverage |
+| Queue — score and verdict per article | Focus picker — 20 angles ranked by research coverage |
 | ![Uber Research](docs/screenshots/04_uber_research.png) | ![Scoring](docs/screenshots/07_scoring_system.png) |
-| Uber Research — gap analysis + targeted search | Full scoring breakdown with Q1–Q8 signal audit |
+| Uber Research — fills gaps before generation | Scoring — 8-phase breakdown with fix prescription |
 
-→ [docs/screenshots/](docs/screenshots/) for all 9 screenshots with descriptions.
+→ [All screenshots](docs/screenshots/)
 
 ---
 
-## Architecture
+## How it works
 
 ```
-Discovery ──► Research ──► Suitability Gate ──► Schema ──► Focus ──► Generate ──► Score
-   │              │                               Suggest    Picker       │           │
-SearXNG        Qdrant                             BM25+LLM   BM25+LLM   Ollama     qwen3.6
-Reddit         Crawl4AI                                      Validator   27b/122b   27b
-Google News    Reranker                                      BM25 sort   think=True
-                    └──► Uber Research (gap analysis + targeted search, if thin)
+You choose a topic
+        │
+        ▼
+Discovery — SearXNG + Reddit + Google News
+        │
+        ▼
+Research — crawl sources, chunk, embed, index into Qdrant
+        │
+   Suitability gate — thin research? Uber Research fills the gaps
+        │
+        ▼
+You pick the thesis angle (20 options ranked by research coverage)
+        │
+        ▼
+Generate — your persona injected via RAG, thesis enforced
+        │
+        ▼
+Score — 8-phase audit: argument structure, voice, quality signals
+        │
+        ▼
+article.md  +  optional Polish/Norwegian translation via Bielik
 ```
+
+Runs overnight without supervision. You review in the morning.
+
+---
+
+## What makes it different
+
+**Thesis enforcement.** You select a focus angle before generation. The model builds the article around that argument — it cannot drift into a generic overview.
+
+**Your voice, not ChatGPT's.** A persona collection in Qdrant holds rhetorical chunks extracted from your own writing across 7 dimensions (argument, critique, skepticism, reference, appreciation, humor, personal). Retrieved at generation time based on the article's focus.
+
+**Real research.** SearXNG meta-search, full-text Chromium crawling, BM25 pre-ranking, BAAI neural reranking. Sources cited in output are sources that were actually read.
+
+**Honest scoring.** The scoring pass runs a separate LLM call with `think=True` and audits 10 disqualifiers, 8 quality signals, 4 genericity signals, and argument structure A1–A4. It tells you the specific sentence that failed and what to rewrite.
+
+**Permanent knowledge base.** Research chunks persist across sessions. The system builds domain knowledge over time — not a blank slate every run.
 
 ---
 
 ## Stack
 
-| Component       | Technology                          | Host              |
-| --------------- | ----------------------------------- | ----------------- |
-| LLM Generate    | Ollama + qwen3.6:27b / qwen3.5:122b | Windows, RTX 5090 |
-| LLM Embed       | Ollama + qwen3-embedding:8b-q8\_0   | Ubuntu, GTX 1080  |
-| LLM Score       | Ollama + qwen3.6:27b (think=True)   | Windows, RTX 5090 |
-| LLM Translate   | Ollama + Bielik 11B v2.2 Q8\_0      | Windows, RTX 5090 |
-| Vector DB       | Qdrant                              | Ubuntu            |
-| Neural Reranker | BAAI/bge-reranker-v2-m3 (FastAPI)   | Ubuntu, GTX 1080  |
-| Web Search      | SearXNG (self-hosted)               | Ubuntu            |
-| Web Crawler     | Crawl4AI (FastAPI + Chromium)       | Ubuntu            |
-| Cache           | Valkey (Redis-compatible)           | Ubuntu            |
-| CMS             | PayloadCMS 3.x + MongoDB            | Ubuntu            |
-| Frontend        | Next.js 15 + Tailwind CSS v4        | Ubuntu            |
+Fully self-hosted. No cloud APIs in the core pipeline.
 
-### Model Tiers
+| Role | Technology | Hardware |
+|------|-----------|----------|
+| Generate | Ollama + qwen3.6:27b / qwen3.5:122b | Windows, RTX 5090 |
+| Score | Ollama + qwen3.6:27b (think=True) | Windows, RTX 5090 |
+| Translate | Bielik 11B v2.2 Q8\_0 | Windows, RTX 5090 |
+| Embed | qwen3-embedding:8b (4096-dim) | Ubuntu, GTX 1080 |
+| Rerank | BAAI/bge-reranker-v2-m3 | Ubuntu, GTX 1080 |
+| Vector DB | Qdrant | Ubuntu |
+| Search | SearXNG (self-hosted) | Ubuntu |
+| Crawler | Crawl4AI + Chromium | Ubuntu |
 
-| Key       | Model                    | Use                                            |
-| --------- | ------------------------ | ---------------------------------------------- |
-| DEV       | qwen2.5:7b               | Testing, metadata, fast iteration              |
-| NORMAL    | qwen3.6:27b dense        | Production generation, scoring, schema suggest |
-| NORMAL2   | qwen3.5:35b-a3b MoE      | Generate variant for factual articles          |
-| MAX       | qwen3.5:122b MoE         | Maximum quality, temperature 0.2               |
-| Embed     | qwen3-embedding:8b-q8\_0 | 4096-dim dense vectors                         |
-| Translate | Bielik 11B v2.2 Q8\_0    | Polish / Norwegian translation (on demand)     |
+Minimum: one GPU with 24GB+ VRAM for 27b models. Ubuntu server for always-on services.
 
 ---
 
 ## Requirements
 
-Two machines is the practical minimum. One machine is possible but expect VRAM contention — the embedding server, Qdrant, reranker, SearXNG, and Crawl4AI need to be available 24/7 alongside the main LLM.
-
-**Machine 1 — Windows (LLM inference):**
-
-- NVIDIA GPU, 24GB+ VRAM (RTX 3090 minimum for 27b models)
-- Ollama with models pulled: `qwen3.6:27b`, `qwen3.5:35b-a3b`, `qwen2.5:7b`, `SpeakLeash/bielik-11b-v2.2-instruct:Q8_0`
+**Machine 1 — Windows:**
+- NVIDIA GPU 24GB+ VRAM
+- Ollama: `qwen3.6:27b`, `qwen3.5:35b-a3b`, `qwen2.5:7b`, `SpeakLeash/bielik-11b-v2.2-instruct:Q8_0`
 - Python 3.11+
 
-**Machine 2 — Ubuntu (services):**
-
-- Any NVIDIA GPU for embedding and reranking (GTX 1080 8GB is sufficient)
-- Qdrant, SearXNG, Crawl4AI, Valkey, BAAI reranker, Playwright service
-
-See [docs/setup.md](docs/setup.md) for full installation steps.
+**Machine 2 — Ubuntu:**
+- Any NVIDIA GPU (GTX 1080 8GB is sufficient)
+- Qdrant, SearXNG, Crawl4AI, Valkey, BAAI reranker
 
 ---
 
 ## Quick Start
 
-```
+```bash
 git clone https://github.com/LucasGraphic/nonsequitur
 cd nonsequitur
 pip install -r requirements.txt
 cp .env.example .env
-# Edit .env with your Machine 2 IP addresses
+# set Machine 2 IP addresses in .env
 python nonsequitur.py
 ```
 
-Before first run you need:
-
-- Services running on Machine 2 (see [docs/setup.md](docs/setup.md))
-- A `persona_{name}` collection in Qdrant (see [docs/persona-system.md](docs/persona-system.md))
-- SearXNG configured with your preferred engines
+→ [docs/setup.md](docs/setup.md) — full installation guide
+→ [docs/persona-system.md](docs/persona-system.md) — building your voice
+→ [docs/rag-architecture.md](docs/rag-architecture.md) — retrieval and reranking
+→ [docs/schemas.md](docs/schemas.md) — 12 article schemas
 
 ---
 
@@ -142,26 +176,15 @@ Before first run you need:
 
 ---
 
-## Documentation
-
-- [docs/setup.md](docs/setup.md) — full installation guide (Ubuntu services + Windows)
-- [docs/persona-system.md](docs/persona-system.md) — building and managing author voice
-- [docs/rag-architecture.md](docs/rag-architecture.md) — retrieval, reranking, knowledge base
-- [docs/schemas.md](docs/schemas.md) — article schemas and when to use each
-- [docs/screenshots/](docs/screenshots/) — annotated screenshots
-
----
-
 ## Performance
 
-| Metric                    | Value            |
-| ------------------------- | ---------------- |
-| Research time (~40 URLs)  | 5–6 min          |
-| Generate time (27b)       | 150–220s         |
-| Article body              | 6000–12000 chars |
-| RAG pool before reranking | 100 chunks       |
-| RAG top-k after reranking | ~28 chunks       |
-| Embedding dimensions      | 4096             |
+| Metric | Value |
+|--------|-------|
+| Research (~40 URLs) | 5–6 min |
+| Generation (27b) | 150–220s |
+| Article body | 6000–12000 chars |
+| RAG chunks (after rerank) | ~28 |
+| Embedding dimensions | 4096 |
 
 ---
 
@@ -175,8 +198,8 @@ Every article is anchored to a thesis the author chose. The pipeline automates t
 
 ## Author
 
-**Łukasz Grochal** — photographer, web developer, AI art creator. [lucasgraphic.com](https://lucasgraphic.com) · Norway
+**Łukasz Grochal** — photographer, developer, AI art creator. [lucasgraphic.com](https://lucasgraphic.com) · Norway
 
 ---
 
-*Self-hosted infrastructure. No cloud LLMs in the core pipeline. No subscriptions.*
+*No subscriptions. No cloud. No ChatGPT voice.*
